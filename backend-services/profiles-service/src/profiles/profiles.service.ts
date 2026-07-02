@@ -1,40 +1,38 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
-import { ProfilesRepository } from './profiles.repository'
-import { Profile } from './domain/profile.entity'
+import { ProfilesDao } from './dao/profiles.dao'
+import { ProfileModel } from './domain-model/profile.model'
 import { CreateProfileDto } from './dto/create-profile.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
 
 @Injectable()
 export class ProfilesService {
-  constructor(private readonly repository: ProfilesRepository) {}
+  constructor(private readonly dao: ProfilesDao) {}
 
-  findAll(): Promise<Profile[]> {
-    return this.repository.findAll()
+  findAll(): Promise<ProfileModel[]> {
+    return this.dao.findAll()
   }
 
-  async create(dto: CreateProfileDto): Promise<Profile> {
-    const existing = await this.repository.findById(dto.id)
+  async create(dto: CreateProfileDto): Promise<ProfileModel> {
+    const existing = await this.dao.findById(dto.id)
     if (existing) {
       throw new ConflictException(`Profile with id "${dto.id}" already exists`)
     }
-    return this.repository.create(dto)
+    return this.dao.create(new ProfileModel(dto))
   }
 
-  async update(id: string, dto: UpdateProfileDto): Promise<Profile> {
-    const existing = await this.repository.findById(id)
-    if (!existing) {
+  async update(id: string, dto: UpdateProfileDto): Promise<ProfileModel> {
+    const model = await this.dao.findById(id)
+    if (!model) {
       throw new NotFoundException(`Profile with id "${id}" not found`)
     }
-    return this.repository.updateName(
-      existing,
-      dto.firstName ?? existing.firstName,
-      dto.lastName ?? existing.lastName,
-    )
+    if (dto.firstName !== undefined) model.firstName = dto.firstName
+    if (dto.lastName !== undefined) model.lastName = dto.lastName
+    return this.dao.save(model)
   }
 
   async remove(id: string): Promise<void> {
-    const deleted = await this.repository.delete(id)
-    if (!deleted) {
+    const affected = await this.dao.delete(id)
+    if (!affected) {
       throw new NotFoundException(`Profile with id "${id}" not found`)
     }
   }

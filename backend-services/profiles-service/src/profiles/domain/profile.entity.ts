@@ -1,6 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm'
-
-export type Gender = 'male' | 'female'
+import { Gender } from '../enum/gender.enum'
 
 @Entity('profiles')
 export class Profile {
