@@ -14,6 +14,7 @@ import { ProfilesService } from './profiles.service'
 import { ProfileModel } from './domain-model/profile.model'
 import { CreateProfileDto } from './dto/create-profile.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
+import { RandomProfile } from './providers/random-profile.provider'
 
 @Controller('profiles')
 export class ProfilesController {
@@ -22,6 +23,11 @@ export class ProfilesController {
   @Get()
   findAll(): Promise<ProfileModel[]> {
     return this.profilesService.findAll()
+  }
+
+  @Get('random')
+  fetchRandom(): Promise<RandomProfile[]> {
+    return this.profilesService.fetchRandom()
   }
 
   @Post()

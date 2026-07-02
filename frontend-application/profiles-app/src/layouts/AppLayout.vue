@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import AppLanguageSwitcher from '../shared/components/AppLanguageSwitcher.vue'
-import AppToastContainer from '../shared/components/AppToastContainer.vue'
+import GiLanguageSwitcher from '../shared/components/GiLanguageSwitcher.vue'
+import GiToastContainer from '../shared/components/GiToastContainer.vue'
 </script>
 
 <template>
@@ -29,7 +29,7 @@ import AppToastContainer from '../shared/components/AppToastContainer.vue'
           <span class="app-layout__brand-name">Profile Explorer</span>
         </div>
         <div class="app-layout__header-actions">
-          <AppLanguageSwitcher />
+          <GiLanguageSwitcher />
         </div>
       </div>
     </header>
@@ -38,7 +38,7 @@ import AppToastContainer from '../shared/components/AppToastContainer.vue'
         <slot />
       </div>
     </main>
-    <AppToastContainer />
+    <GiToastContainer />
   </div>
 </template>
 

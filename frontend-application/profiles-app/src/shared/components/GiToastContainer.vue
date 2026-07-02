@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { useToast } from '../composables/useToast'
-import AppToast from './AppToast.vue'
+import GiToast from './GiToast.vue'
 
 const { toasts, dismiss } = useToast()
 </script>
 
 <template>
   <Teleport to="body">
-    <div class="app-toast-container" aria-label="Notifications">
-      <TransitionGroup name="toast" tag="div" class="app-toast-container__stack">
-        <AppToast
+    <div class="gi-toast-container" aria-label="Notifications">
+      <TransitionGroup name="toast" tag="div" class="gi-toast-container__stack">
+        <GiToast
           v-for="toast in toasts"
           :key="toast.id"
           :id="toast.id"
@@ -23,7 +23,7 @@ const { toasts, dismiss } = useToast()
 </template>
 
 <style lang="scss" scoped>
-.app-toast-container {
+.gi-toast-container {
   position: fixed;
   inset-block-end: var(--space-6);
   inset-inline-end: var(--space-6);

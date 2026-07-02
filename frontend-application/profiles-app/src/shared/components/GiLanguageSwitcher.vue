@@ -5,18 +5,18 @@ const { locale, setLocale } = useLocale()
 </script>
 
 <template>
-  <div class="app-language-switcher" role="group">
+  <div class="gi-language-switcher" role="group">
     <button
-      class="app-language-switcher__btn"
-      :class="{ 'app-language-switcher__btn--active': locale === 'en' }"
+      class="gi-language-switcher__btn"
+      :class="{ 'gi-language-switcher__btn--active': locale === 'en' }"
       @click="setLocale('en')"
     >
       EN
     </button>
-    <span class="app-language-switcher__divider" aria-hidden="true">|</span>
+    <span class="gi-language-switcher__divider" aria-hidden="true">|</span>
     <button
-      class="app-language-switcher__btn"
-      :class="{ 'app-language-switcher__btn--active': locale === 'he' }"
+      class="gi-language-switcher__btn"
+      :class="{ 'gi-language-switcher__btn--active': locale === 'he' }"
       @click="setLocale('he')"
     >
       HE
@@ -25,7 +25,7 @@ const { locale, setLocale } = useLocale()
 </template>
 
 <style lang="scss" scoped>
-.app-language-switcher {
+.gi-language-switcher {
   @include flx($align: center, $gap: var(--space-1));
 
   &__btn {

@@ -17,22 +17,22 @@ function handleClick(event: MouseEvent): void {
 
 <template>
   <button
-    class="app-button"
+    class="gi-button"
     :class="[
-      `app-button--${variant ?? 'primary'}`,
-      `app-button--${size ?? 'md'}`,
-      { 'app-button--loading': loading },
+      `gi-button--${variant ?? 'primary'}`,
+      `gi-button--${size ?? 'md'}`,
+      { 'gi-button--loading': loading },
     ]"
     :disabled="disabled || loading"
     @click="handleClick"
   >
-    <span v-if="loading" class="app-button__spinner" aria-hidden="true" />
+    <span v-if="loading" class="gi-button__spinner" aria-hidden="true" />
     <slot />
   </button>
 </template>
 
 <style lang="scss" scoped>
-.app-button {
+.gi-button {
   @include flx($justify: center, $align: center, $gap: var(--space-2));
   position: relative;
   border: none;

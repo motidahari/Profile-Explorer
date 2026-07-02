@@ -8,15 +8,15 @@ defineProps<{
 
 <template>
   <span
-    class="app-skeleton"
-    :class="`app-skeleton--${variant ?? 'rect'}`"
+    class="gi-skeleton"
+    :class="`gi-skeleton--${variant ?? 'rect'}`"
     :style="{ width, height }"
     aria-hidden="true"
   />
 </template>
 
 <style lang="scss" scoped>
-.app-skeleton {
+.gi-skeleton {
   display: block;
   background-color: var(--color-surface-overlay);
   animation: skeleton-pulse 1.5s ease-in-out infinite;

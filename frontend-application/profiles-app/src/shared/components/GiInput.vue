@@ -13,21 +13,21 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="app-input" :class="{ 'app-input--ltr': dir === 'ltr', 'app-input--error': !!error }">
-    <label v-if="label" class="app-input__label">{{ label }}</label>
+  <div class="gi-input" :class="{ 'gi-input--ltr': dir === 'ltr', 'gi-input--error': !!error }">
+    <label v-if="label" class="gi-input__label">{{ label }}</label>
     <input
-      class="app-input__field"
+      class="gi-input__field"
       :value="modelValue"
       :placeholder="placeholder"
       :dir="dir"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
     />
-    <span v-if="error" class="app-input__error" role="alert">{{ error }}</span>
+    <span v-if="error" class="gi-input__error" role="alert">{{ error }}</span>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.app-input {
+.gi-input {
   @include flx($direction: column, $gap: var(--space-1));
   width: 100%;
 
