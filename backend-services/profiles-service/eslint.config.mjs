@@ -1,6 +1,7 @@
 import eslint from '@eslint/js'
 import tseslint from 'typescript-eslint'
 import globals from 'globals'
+import prettier from 'eslint-config-prettier'
 
 export default tseslint.config(
   { ignores: ['dist/**', 'node_modules/**'] },
@@ -15,5 +16,6 @@ export default tseslint.config(
       'no-console': 'warn',
       '@typescript-eslint/no-explicit-any': 'error',
     },
-  }
+  },
+  prettier
 )

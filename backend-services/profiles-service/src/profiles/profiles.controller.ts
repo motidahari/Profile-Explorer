@@ -31,10 +31,7 @@ export class ProfilesController {
   }
 
   @Put(':id')
-  update(
-    @Param('id', ParseUUIDPipe) id: string,
-    @Body() dto: UpdateProfileDto,
-  ): Promise<Profile> {
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateProfileDto): Promise<Profile> {
     return this.profilesService.update(id, dto)
   }
 

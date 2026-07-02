@@ -18,6 +18,11 @@ technical choice must be defensible.
 - **Open a PR when the task is complete.** The user reviews and merges; Claude does not merge.
 - Branch naming: `feat/<name>`, `fix/<name>`, `chore/<name>`, `docs/<name>`.
 - Commit messages: imperative present tense, one line (`add profile list view`, `fix CORS header`).
+- **Before any push, the following must pass — no exceptions:**
+  1. **Code is formatted** — run `npm run format` in each affected workspace (Prettier).
+  2. **Lint passes with zero errors** across every affected file (backend and frontend).
+  3. **All existing tests pass** successfully.
+  If any fails, fix it first. Never push code that is unformatted, fails lint, or breaks a test.
 
 ---
 
@@ -31,9 +36,10 @@ technical choice must be defensible.
 | HTTP (FE) | axios | Consistent error handling, interceptors |
 | Styling | **SCSS + BEM + CSS custom properties + logical properties** | Scalable, designer-grade, BiDi-ready; see Styling System below |
 | i18n | **vue-i18n v9** | Runtime language switching (Hebrew / English); see i18n System below |
-| Backend | Node + TypeScript + Express | Thin API surface, minimal overhead |
-| Persistence | SQLite via `better-sqlite3` | Local file, no daemon, zero-config; defend in DECISIONS.md |
-| Shared types | `backend-services/libs/core` | Unified Profile type between client and server |
+| Backend | Node + TypeScript + **NestJS** | Modular DI architecture, first-class validation & testing |
+| Persistence | **PostgreSQL via TypeORM** (`pg`) | Real relational DB; provisioned locally via `docker-compose`; defend in DECISIONS.md |
+| DB runtime | **Docker Compose** (Postgres 16) | Zero-install local database, matches production |
+| Types | **Inside each service** (no shared lib) | Each service owns its domain types; frontend owns its own copy |
 
 ---
 
@@ -44,8 +50,16 @@ Both sides use `.env` files. Never commit secrets. Always provide a `.env.exampl
 ### Backend — `backend-services/profiles-service/.env`
 ```
 PORT=3000
-DB_PATH=./data/profiles.db
 CORS_ORIGIN=http://localhost:5173
+
+# PostgreSQL (matches docker-compose.yml)
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=profiles
+DB_PASSWORD=profiles
+DB_NAME=profiles
+# Auto-create schema from entities. Dev only — use migrations in production.
+DB_SYNCHRONIZE=true
 ```
 
 ### Frontend — `frontend-application/profiles-app/.env`
@@ -56,7 +70,7 @@ VITE_API_BASE_URL=http://localhost:3000
 Rules:
 - All frontend env vars must be prefixed `VITE_` (Vite requirement).
 - Access via `import.meta.env.VITE_API_BASE_URL` — never hardcode URLs.
-- Access via `process.env.PORT` on the backend.
+- Access via NestJS `ConfigService` on the backend (`@nestjs/config`) — never `process.env` directly in providers.
 - Both repos ship a `.env.example` with all keys filled with safe defaults.
 - `.env` files are git-ignored; `.env.example` files are committed.
 
@@ -73,7 +87,7 @@ styles/
 ├─ _tokens.scss        # ALL design tokens as CSS custom properties + SCSS vars
 ├─ _reset.scss         # minimal CSS reset (box-sizing, margin, font)
 ├─ _typography.scss    # font imports, heading/body scale
-├─ _mixins.scss        # respond-to(), flex-center(), truncate(), etc.
+├─ _mixins.scss        # respond-to(), flx(), flex-center(), truncate(), etc.
 ├─ _animations.scss    # shared keyframes (fade-in, skeleton-pulse, slide-up)
 └─ main.scss           # imports all partials (entry point, imported in main.ts)
 ```
@@ -184,6 +198,29 @@ $breakpoints: (
 }
 ```
 
+### Flex helper — `flx()` (required for all flex layouts)
+**Never write raw `display: flex` + `flex-direction`/`justify-content`/`align-items` in components.**
+Always use the `flx()` mixin:
+```scss
+@mixin flx($direction: row, $justify: flex-start, $align: stretch, $wrap: nowrap, $gap: null) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  flex-wrap: $wrap;
+
+  @if $gap != null {
+    gap: $gap;
+  }
+}
+```
+Usage:
+```scss
+.toolbar { @include flx($justify: space-between, $align: center, $gap: var(--space-3)); }
+.stack   { @include flx($direction: column, $gap: var(--space-4)); }
+```
+`flex-center` is defined in terms of `flx()`.
+
 Usage in components:
 ```scss
 .profile-list {
@@ -212,53 +249,32 @@ locales/
 └─ he.json    # Hebrew — RTL
 ```
 
-### Key structure (flat namespaced keys)
+### Key structure (nested objects — NOT flat keys)
+Locale files use **nested objects**, accessed via dot paths in `t('nav.fetch')`.
 ```json
 // en.json
 {
-  "nav.fetch":              "Fetch",
-  "nav.history":            "History",
-  "nav.back":               "Back",
-  "profile.gender":         "Gender",
-  "profile.name":           "Name",
-  "profile.age":            "Age",
-  "profile.address":        "Address",
-  "profile.contact":        "Contact",
-  "profile.email":          "Email",
-  "profile.phone":          "Phone",
-  "action.save":            "Save",
-  "action.delete":          "Delete",
-  "action.update":          "Update",
-  "action.fetch":           "Fetch",
-  "state.loading":          "Loading…",
-  "state.empty":            "No profiles found",
-  "state.error":            "Something went wrong",
-  "state.retry":            "Retry",
-  "filter.placeholder":     "Filter by name or country…"
+  "nav":    { "fetch": "Fetch", "history": "History", "back": "Back" },
+  "profile": {
+    "gender": "Gender", "name": "Name", "age": "Age", "address": "Address",
+    "contact": "Contact", "email": "Email", "phone": "Phone"
+  },
+  "action": { "save": "Save", "delete": "Delete", "update": "Update", "fetch": "Fetch" },
+  "state":  { "loading": "Loading…", "empty": "No profiles found", "error": "Something went wrong", "retry": "Retry" },
+  "filter": { "placeholder": "Filter by name or country…" }
 }
 ```
 ```json
-// he.json — same keys, Hebrew values
+// he.json — same nested shape, Hebrew values
 {
-  "nav.fetch":              "טען",
-  "nav.history":            "היסטוריה",
-  "nav.back":               "חזרה",
-  "profile.gender":         "מגדר",
-  "profile.name":           "שם",
-  "profile.age":            "גיל",
-  "profile.address":        "כתובת",
-  "profile.contact":        "איש קשר",
-  "profile.email":          "אימייל",
-  "profile.phone":          "טלפון",
-  "action.save":            "שמור",
-  "action.delete":          "מחק",
-  "action.update":          "עדכן",
-  "action.fetch":           "טען",
-  "state.loading":          "טוען…",
-  "state.empty":            "לא נמצאו פרופילים",
-  "state.error":            "משהו השתבש",
-  "state.retry":            "נסה שוב",
-  "filter.placeholder":     "סינון לפי שם או מדינה…"
+  "nav":    { "fetch": "טען", "history": "היסטוריה", "back": "חזרה" },
+  "profile": {
+    "gender": "מגדר", "name": "שם", "age": "גיל", "address": "כתובת",
+    "contact": "איש קשר", "email": "אימייל", "phone": "טלפון"
+  },
+  "action": { "save": "שמור", "delete": "מחק", "update": "עדכן", "fetch": "טען" },
+  "state":  { "loading": "טוען…", "empty": "לא נמצאו פרופילים", "error": "משהו השתבש", "retry": "נסה שוב" },
+  "filter": { "placeholder": "סינון לפי שם או מדינה…" }
 }
 ```
 
@@ -406,21 +422,23 @@ Rules for shared components:
 ```
 profile-explorer/
 ├─ backend-services/
-│  ├─ profiles-service/
-│  │  ├─ .env                    # git-ignored
-│  │  ├─ .env.example            # committed
-│  │  └─ src/
-│  │     ├─ profiles/
-│  │     │  ├─ domain-model/     # Profile model + validation
-│  │     │  ├─ dao/              # SQLite persistence layer
-│  │     │  ├─ service/          # business logic
-│  │     │  ├─ dto/              # request/response DTOs
-│  │     │  ├─ enum/             # error codes
-│  │     │  └─ exception/        # domain errors
-│  │     ├─ infrastructure/      # error middleware, CORS
-│  │     ├─ health/              # GET /health
-│  │     └─ common/
-│  └─ libs/core/                 # shared types (Profile, CreateProfileDto, etc.)
+│  └─ profiles-service/          # NestJS service (self-contained, owns its types)
+│     ├─ .env                    # git-ignored
+│     ├─ .env.example            # committed
+│     ├─ docker-compose.yml      # local PostgreSQL 16
+│     ├─ nest-cli.json
+│     └─ src/
+│        ├─ main.ts              # bootstrap: CORS + global ValidationPipe + port (from env)
+│        ├─ app.module.ts        # ConfigModule + DatabaseModule + feature modules
+│        ├─ database/            # TypeOrmModule.forRootAsync (Postgres config from env)
+│        ├─ health/              # GET /health (controller + module)
+│        └─ profiles/
+│           ├─ profiles.module.ts        # TypeOrmModule.forFeature([Profile])
+│           ├─ profiles.controller.ts    # 4 endpoints; ParseUUIDPipe on :id
+│           ├─ profiles.service.ts       # business logic; 409 duplicate / 404 missing
+│           ├─ profiles.repository.ts    # wraps TypeORM Repository<Profile>
+│           ├─ domain/                   # Profile @Entity — domain types live here
+│           └─ dto/                      # Create/Update DTOs (class-validator)
 │
 ├─ frontend-application/
 │  └─ profiles-app/
@@ -432,7 +450,7 @@ profile-explorer/
 │        │  ├─ components/       # ProfileRow, ProfileCard, FilterBar (feature-specific)
 │        │  ├─ stores/           # useProfilesStore (Pinia)
 │        │  ├─ services/         # randomUserApi.ts, profilesApi.ts
-│        │  ├─ types/            # local re-exports from libs/core
+│        │  ├─ types/            # frontend-owned Profile types (mirrors the API)
 │        │  └─ composables/      # useFilter, useProfileOrigin
 │        ├─ core/                # router, config, http (axios instance)
 │        ├─ shared/
@@ -482,7 +500,7 @@ Rules: consistent error handling, correct HTTP status codes, request body valida
 - [ ] **Screen 2 — Saved Profiles**: identical layout to Screen 1; data from backend
 - [ ] **Screen 3 — Profile Detail**: large image, gender, editable name, age + year of birth, address, contact; 4 buttons with origin-conditional logic
 - [ ] **BiDi (Screen 3)**: RTL layout with Hebrew labels; LTR data for email, phone, street, name `<input dir="ltr">`
-- [ ] **Backend**: 4 endpoints + SQLite + error handling + shared types
+- [ ] **Backend**: 4 endpoints + PostgreSQL (TypeORM) + validation/error handling + service-owned types
 - [ ] **CORS** configured between client (`:5173`) and server (`:3000`)
 - [ ] **Stable identifier**: use `login.uuid` from randomuser.me as the profile `id`
 - [ ] **Duplicate prevention**: `POST /profiles` returns `409` if `id` already exists
@@ -495,7 +513,7 @@ Rules: consistent error handling, correct HTTP status codes, request body valida
 
 ## Implicit Requirements (Read the Spec Twice)
 
-1. **Unified data model** — map randomuser.me response fields to the shared `Profile` type explicitly.
+1. **Unified data model** — map randomuser.me response fields to the `Profile` type explicitly (backend owns its `Profile` entity; frontend owns a matching type).
 2. **Stable identifier** — `login.uuid` from randomuser.me; backend generates none of its own.
 3. **Duplicate prevention** — `409 Conflict` on duplicate save.
 4. **Profile origin** — track `source: 'api' | 'db'` through routing so Screen 3 knows which buttons to show.
@@ -536,7 +554,7 @@ Use the agents in `.claude/agents/` for every task. Pick by task type:
 | Situation | Agent |
 |-----------|-------|
 | Scaffolding a new backend domain (model, DAO, service, DTOs, exceptions) | `backend-developer` + skill `backend-scaffolding-domains` |
-| Adding route handlers and Express middleware | `backend-developer` + skill `backend-creating-service-handlers` |
+| Adding NestJS controllers, guards, pipes, and modules | `backend-developer` + skill `backend-creating-service-handlers` |
 | Any backend implementation task | `backend-developer` |
 | Writing unit tests for backend services | `backend-qa-tester` + skill `backend-writing-unit-tests` |
 | Writing integration/API tests | `backend-qa-tester` + skill `backend-writing-integration-tests` |
@@ -593,20 +611,19 @@ Use the agents in `.claude/agents/` for every task. Pick by task type:
 
 Each item below = one branch + one PR.
 
-1. `chore/scaffold-monorepo` — `package.json` workspaces, `tsconfig.base.json`, `eslint.config.mjs`, `.prettierrc`, `.gitignore`, `.env.example` files, root `README.md`
-2. `feat/shared-types` — `libs/core`: `Profile` type, `CreateProfileDto`, `UpdateProfileDto`
-3. `feat/scss-design-system` — `_tokens.scss`, `_reset.scss`, `_typography.scss`, `_mixins.scss` (incl. logical property helpers), `_animations.scss`, `main.scss`; import Inter font
-4. `feat/i18n-setup` — install `vue-i18n`, create `en.json` + `he.json` with all keys, wire into `main.ts` (read saved locale from `localStorage` before mount, set `dir`/`lang` on `<html>`), create `useLocale` composable (`setLocale` writes to `localStorage`), add `AppLanguageSwitcher` to `AppLayout` header
-5. `feat/shared-components` — `AppButton`, `AppInput` (with `--ltr` modifier), `AppCard`, `AppAvatar`, `AppBadge`, `AppSpinner`, `AppSkeleton`, `AppEmptyState`, `AppErrorState`; barrel export; all styles use logical properties
-5. `feat/backend-profiles-service` — Express app, SQLite DAO, service, all 4 endpoints, CORS (from `.env`), health check, error middleware
-6. `feat/frontend-router-and-store` — Vue Router (4 routes + profile origin param), Pinia store skeleton, axios instance (base URL from `.env`)
-7. `feat/screen-0-home` — `HomeView` with Fetch and History buttons using `AppButton`
-8. `feat/screen-1-random-list` — randomuser.me fetch, `ProfileRow` component using shared components, `useFilter` composable, responsive grid
-9. `feat/screen-2-saved-profiles` — `SavedListView` backed by `GET /profiles`, reusing `ProfileRow`
-10. `feat/screen-3-profile-detail` — `ProfileDetailView` with all fields using `AppInput`/`AppButton`, 4 buttons with origin logic, responsive layout
-11. `feat/screen-3-bidi` — all labels use `t('...')` keys, RTL layout via `dir` on `<html>`, `dir="ltr"` + `.app-input--ltr` on data inputs; verify logical properties flip correctly
-12. `feat/extension` — chosen extension (document in DECISIONS.md)
-13. `docs/decisions-and-readme` — finalize `DECISIONS.md`, `AI_USAGE.md`, all `README.md` files
+> Note: each app is **self-contained** (its own `package.json`, `tsconfig`, ESLint/Prettier) — there is no root workspace config and no shared scaffold branch.
+
+1. ✅ `feat/frontend-app-setup` — Vue 3 + Vite + TS app: SCSS design system (`_tokens/_reset/_typography/_mixins` incl. `flx()` + logical-property helpers/`_animations`), Inter font, `en.json`/`he.json` (nested), vue-i18n wired with `localStorage` + `dir`/`lang`, `useLocale`, router (4 routes), axios instance *(merged)*
+2. ✅ `feat/backend-nestjs` — NestJS service: TypeORM + PostgreSQL (`docker-compose`), `Profile` entity + DTOs (types inside the service), all 4 endpoints + `/health`, CORS + config from `.env`, global `ValidationPipe`, `ParseUUIDPipe` on `:id` *(merged)*
+3. `feat/shared-components` — `AppButton`, `AppInput` (with `--ltr` modifier), `AppCard`, `AppAvatar`, `AppBadge`, `AppSpinner`, `AppSkeleton`, `AppEmptyState`, `AppErrorState`; barrel export; all styles use logical properties
+4. `feat/frontend-store` — Pinia store skeleton (profiles state + profile-origin tracking); router & axios instance already in place from step 1
+5. `feat/screen-0-home` — `HomeView` with Fetch and History buttons using `AppButton`
+6. `feat/screen-1-random-list` — randomuser.me fetch, `ProfileRow` component using shared components, `useFilter` composable, responsive grid
+7. `feat/screen-2-saved-profiles` — `SavedListView` backed by `GET /profiles`, reusing `ProfileRow`
+8. `feat/screen-3-profile-detail` — `ProfileDetailView` with all fields using `AppInput`/`AppButton`, 4 buttons with origin logic, responsive layout
+9. `feat/screen-3-bidi` — all labels use `t('...')` keys, RTL layout via `dir` on `<html>`, `dir="ltr"` + `.app-input--ltr` on data inputs; verify logical properties flip correctly
+10. `feat/extension` — chosen extension (document in DECISIONS.md)
+11. `docs/decisions-and-readme` — finalize `DECISIONS.md`, `AI_USAGE.md`, all `README.md` files
 
 ---
 
@@ -640,17 +657,19 @@ Each item below = one branch + one PR.
 
 ## Running the Project (Quick Reference)
 
+Each app is self-contained — install and run them independently.
+
 ```bash
-# Install all workspaces
+# --- Backend (port 3000) ---
+cd backend-services/profiles-service
+cp .env.example .env          # first time only
 npm install
+npm run db:up                 # start PostgreSQL (Docker Compose)
+npm run dev
 
-# Copy env files (first time only)
-cp backend-services/profiles-service/.env.example backend-services/profiles-service/.env
-cp frontend-application/profiles-app/.env.example frontend-application/profiles-app/.env
-
-# Backend (port 3000)
-cd backend-services/profiles-service && npm run dev
-
-# Frontend (port 5173)
-cd frontend-application/profiles-app && npm run dev
+# --- Frontend (port 5173) ---
+cd frontend-application/profiles-app
+cp .env.example .env          # first time only
+npm install
+npm run dev
 ```

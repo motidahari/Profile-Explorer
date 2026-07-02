@@ -5,11 +5,6 @@ import { ProfilesModule } from './profiles/profiles.module'
 import { DatabaseModule } from './database/database.module'
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    DatabaseModule,
-    HealthModule,
-    ProfilesModule,
-  ],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), DatabaseModule, HealthModule, ProfilesModule],
 })
 export class AppModule {}
