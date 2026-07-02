@@ -9,6 +9,10 @@
     "start:prod": "node dist/main.js",
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
+    "test": "npm run test:unit && npm run test:integration && npm run test:api",
+    "test:unit": "bash ../../scripts/run-tests.sh --label backend:unit --bin jest --glob \"src/**/*.spec.ts\" --exclude .integration-spec.ts --exclude .e2e-spec.ts",
+    "test:integration": "bash ../../scripts/run-tests.sh --label backend:integration --bin jest --glob \"src/**/*.integration-spec.ts\" --glob \"test/**/*.integration-spec.ts\"",
+    "test:api": "bash ../../scripts/run-tests.sh --label backend:api --bin jest --glob \"test/**/*.e2e-spec.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\""
