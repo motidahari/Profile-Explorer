@@ -4,6 +4,7 @@ export type Gender = 'male' | 'female'
 
 @Entity('profiles')
 export class Profile {
+  // randomuser.me login.uuid — the stable identifier for a profile.
   @PrimaryColumn('uuid')
   id!: string
 

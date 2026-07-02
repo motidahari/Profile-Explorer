@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common'
@@ -30,13 +31,16 @@ export class ProfilesController {
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateProfileDto): Promise<Profile> {
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<Profile> {
     return this.profilesService.update(id, dto)
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): Promise<void> {
+  remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.profilesService.remove(id)
   }
 }
