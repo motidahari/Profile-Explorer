@@ -8,6 +8,9 @@
     "build": "vue-tsc --build && vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc --build --force",
+    "test": "npm run test:unit && npm run test:page",
+    "test:unit": "bash ../../scripts/run-tests.sh --label frontend:unit --bin vitest --glob \"src/**/*.spec.ts\" --exclude .page.spec.ts -- run",
+    "test:page": "bash ../../scripts/run-tests.sh --label frontend:page --bin playwright --glob \"src/**/*.page.spec.ts\" --glob \"tests/**/*.page.spec.ts\" -- test",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,vue,scss,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,vue,scss,json}\""
