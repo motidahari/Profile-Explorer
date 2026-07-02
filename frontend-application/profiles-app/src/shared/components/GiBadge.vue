@@ -6,13 +6,13 @@ defineProps<{
 </script>
 
 <template>
-  <span class="app-badge" :class="`app-badge--${variant ?? 'neutral'}`">
+  <span class="gi-badge" :class="`gi-badge--${variant ?? 'neutral'}`">
     {{ label }}
   </span>
 </template>
 
 <style lang="scss" scoped>
-.app-badge {
+.gi-badge {
   display: inline-flex;
   align-items: center;
   padding-block: var(--space-1);

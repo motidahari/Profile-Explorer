@@ -7,11 +7,11 @@ defineProps<{
 </script>
 
 <template>
-  <div class="app-empty-state">
-    <span v-if="icon" class="app-empty-state__icon" aria-hidden="true">{{ icon }}</span>
+  <div class="gi-empty-state">
+    <span v-if="icon" class="gi-empty-state__icon" aria-hidden="true">{{ icon }}</span>
     <svg
       v-else
-      class="app-empty-state__icon-default"
+      class="gi-empty-state__icon-default"
       width="48"
       height="48"
       viewBox="0 0 48 48"
@@ -28,13 +28,13 @@ defineProps<{
       />
       <circle cx="24" cy="18" r="4" fill="currentColor" opacity="0.5" />
     </svg>
-    <p class="app-empty-state__title">{{ title }}</p>
-    <p v-if="description" class="app-empty-state__description">{{ description }}</p>
+    <p class="gi-empty-state__title">{{ title }}</p>
+    <p v-if="description" class="gi-empty-state__description">{{ description }}</p>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.app-empty-state {
+.gi-empty-state {
   @include flx($direction: column, $align: center, $gap: var(--space-3));
   padding-block: var(--space-12);
   text-align: center;

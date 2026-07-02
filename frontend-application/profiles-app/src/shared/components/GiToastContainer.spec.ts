@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import AppToastContainer from './AppToastContainer.vue'
+import GiToastContainer from './GiToastContainer.vue'
 import { useToast } from '../composables/useToast'
 
-describe('AppToastContainer', () => {
+describe('GiToastContainer', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     useToast().clear()
@@ -18,7 +18,7 @@ describe('AppToastContainer', () => {
     const { show } = useToast()
     show('Hello toast', { type: 'info', duration: 9999 })
 
-    const wrapper = mount(AppToastContainer, {
+    const wrapper = mount(GiToastContainer, {
       attachTo: document.body,
       global: { stubs: { teleport: true } },
     })
@@ -32,15 +32,15 @@ describe('AppToastContainer', () => {
     const { show } = useToast()
     show('Dismiss me', { type: 'info', duration: 9999 })
 
-    const wrapper = mount(AppToastContainer, {
+    const wrapper = mount(GiToastContainer, {
       attachTo: document.body,
       global: { stubs: { teleport: true } },
     })
 
     await wrapper.vm.$nextTick()
-    await wrapper.find('.app-toast__close').trigger('click')
+    await wrapper.find('.gi-toast__close').trigger('click')
     await wrapper.vm.$nextTick()
-    expect(wrapper.find('.app-toast').exists()).toBe(false)
+    expect(wrapper.find('.gi-toast').exists()).toBe(false)
     wrapper.unmount()
   })
 })

@@ -7,10 +7,10 @@ defineProps<{
 
 <template>
   <div
-    class="app-card"
+    class="gi-card"
     :class="{
-      'app-card--elevated': elevated,
-      'app-card--hoverable': hoverable,
+      'gi-card--elevated': elevated,
+      'gi-card--hoverable': hoverable,
     }"
   >
     <slot />
@@ -18,7 +18,7 @@ defineProps<{
 </template>
 
 <style lang="scss" scoped>
-.app-card {
+.gi-card {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);

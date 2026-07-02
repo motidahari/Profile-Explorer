@@ -6,17 +6,17 @@ defineProps<{
 </script>
 
 <template>
-  <div class="app-list">
-    <div v-if="loading" class="app-list__loading">
+  <div class="gi-list">
+    <div v-if="loading" class="gi-list__loading">
       <slot name="loading" />
     </div>
     <template v-else-if="items.length === 0">
-      <div class="app-list__empty">
+      <div class="gi-list__empty">
         <slot name="empty" />
       </div>
     </template>
     <template v-else>
-      <div v-for="(item, index) in items" :key="index" class="app-list__item">
+      <div v-for="(item, index) in items" :key="index" class="gi-list__item">
         <slot name="item" :item="item" :index="index" />
       </div>
     </template>
@@ -24,7 +24,7 @@ defineProps<{
 </template>
 
 <style lang="scss" scoped>
-.app-list {
+.gi-list {
   width: 100%;
 
   &__loading {
