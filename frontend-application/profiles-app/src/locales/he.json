@@ -1,21 +1,31 @@
 {
-  "nav.fetch": "טען",
-  "nav.history": "היסטוריה",
-  "nav.back": "חזרה",
-  "profile.gender": "מגדר",
-  "profile.name": "שם",
-  "profile.age": "גיל",
-  "profile.address": "כתובת",
-  "profile.contact": "איש קשר",
-  "profile.email": "אימייל",
-  "profile.phone": "טלפון",
-  "action.save": "שמור",
-  "action.delete": "מחק",
-  "action.update": "עדכן",
-  "action.fetch": "טען",
-  "state.loading": "טוען…",
-  "state.empty": "לא נמצאו פרופילים",
-  "state.error": "משהו השתבש",
-  "state.retry": "נסה שוב",
-  "filter.placeholder": "סינון לפי שם או מדינה…"
+  "nav": {
+    "fetch": "טען",
+    "history": "היסטוריה",
+    "back": "חזרה"
+  },
+  "profile": {
+    "gender": "מגדר",
+    "name": "שם",
+    "age": "גיל",
+    "address": "כתובת",
+    "contact": "איש קשר",
+    "email": "אימייל",
+    "phone": "טלפון"
+  },
+  "action": {
+    "save": "שמור",
+    "delete": "מחק",
+    "update": "עדכן",
+    "fetch": "טען"
+  },
+  "state": {
+    "loading": "טוען…",
+    "empty": "לא נמצאו פרופילים",
+    "error": "משהו השתבש",
+    "retry": "נסה שוב"
+  },
+  "filter": {
+    "placeholder": "סינון לפי שם או מדינה…"
+  }
 }

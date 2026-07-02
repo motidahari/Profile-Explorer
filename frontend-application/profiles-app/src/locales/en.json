@@ -1,21 +1,31 @@
 {
-  "nav.fetch": "Fetch",
-  "nav.history": "History",
-  "nav.back": "Back",
-  "profile.gender": "Gender",
-  "profile.name": "Name",
-  "profile.age": "Age",
-  "profile.address": "Address",
-  "profile.contact": "Contact",
-  "profile.email": "Email",
-  "profile.phone": "Phone",
-  "action.save": "Save",
-  "action.delete": "Delete",
-  "action.update": "Update",
-  "action.fetch": "Fetch",
-  "state.loading": "Loading…",
-  "state.empty": "No profiles found",
-  "state.error": "Something went wrong",
-  "state.retry": "Retry",
-  "filter.placeholder": "Filter by name or country…"
+  "nav": {
+    "fetch": "Fetch",
+    "history": "History",
+    "back": "Back"
+  },
+  "profile": {
+    "gender": "Gender",
+    "name": "Name",
+    "age": "Age",
+    "address": "Address",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "action": {
+    "save": "Save",
+    "delete": "Delete",
+    "update": "Update",
+    "fetch": "Fetch"
+  },
+  "state": {
+    "loading": "Loading…",
+    "empty": "No profiles found",
+    "error": "Something went wrong",
+    "retry": "Retry"
+  },
+  "filter": {
+    "placeholder": "Filter by name or country…"
+  }
 }

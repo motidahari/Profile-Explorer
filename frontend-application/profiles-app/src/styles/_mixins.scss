@@ -11,10 +11,20 @@ $breakpoints: (
   }
 }
 
-@mixin flex-center {
+@mixin flx($direction: row, $justify: flex-start, $align: stretch, $wrap: nowrap, $gap: null) {
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  flex-wrap: $wrap;
+
+  @if $gap != null {
+    gap: $gap;
+  }
+}
+
+@mixin flex-center {
+  @include flx($justify: center, $align: center);
 }
 
 @mixin truncate {

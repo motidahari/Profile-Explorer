@@ -30,17 +30,15 @@
 
 <style lang="scss" scoped>
 .app-layout {
+  @include flx($direction: column);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 
   &__header {
+    @include flx($align: center);
     height: var(--header-height);
     background-color: var(--color-surface);
     border-block-end: 1px solid var(--color-border);
     box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: center;
     position: sticky;
     inset-block-start: 0;
     z-index: 100;
@@ -57,25 +55,19 @@
     }
 
     &--header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      @include flx($justify: space-between, $align: center);
     }
   }
 
   &__brand {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
+    @include flx($align: center, $gap: var(--space-2));
     color: var(--color-primary);
     text-decoration: none;
     user-select: none;
   }
 
   &__brand-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @include flx($justify: center, $align: center);
     width: 36px;
     height: 36px;
     background: var(--color-primary-light);
@@ -92,9 +84,7 @@
   }
 
   &__header-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
+    @include flx($align: center, $gap: var(--space-3));
   }
 
   &__main {
