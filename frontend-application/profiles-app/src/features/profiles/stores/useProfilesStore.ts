@@ -84,37 +84,100 @@ export const useProfilesStore = defineStore('profiles', () => {
     }
   }
 
-  // POST /profiles. Errors (e.g. 409 duplicate) propagate to the caller so the
-  // UI can surface them via toast.
+  // POST /profiles. Optimistically pushes a provisional copy of the profile
+  // into savedProfiles so the UI responds immediately without waiting for the
+  // round-trip. On success the provisional entry is replaced with the server
+  // response (which carries real createdAt/updatedAt). On failure the
+  // provisional entry is removed and the error re-thrown for the UI to toast.
   async function saveProfile(profile: Profile): Promise<Profile> {
-    const created = await profilesService.create(toPayload(profile))
-    if (!isSaved(created.id)) {
-      savedProfiles.value.push(created)
+    // Capture before the optimistic mutation so the rollback branch is correct
+    // even when isSaved() would return a different value after the push.
+    const alreadySaved = isSaved(profile.id)
+
+    if (!alreadySaved) {
+      savedProfiles.value.push({ ...profile })
     }
-    return created
+
+    try {
+      const created = await profilesService.create(toPayload(profile))
+
+      if (!alreadySaved) {
+        // Swap the provisional entry for the confirmed server response so
+        // timestamps and any server-normalised fields are accurate.
+        const provisionalIndex = savedProfiles.value.findIndex((p) => p.id === created.id)
+        if (provisionalIndex !== -1) {
+          savedProfiles.value[provisionalIndex] = created
+        }
+      }
+
+      return created
+    } catch (err) {
+      if (!alreadySaved) {
+        // Rollback: the provisional entry was never confirmed by the server.
+        savedProfiles.value = savedProfiles.value.filter((p) => p.id !== profile.id)
+      }
+      throw err
+    }
   }
 
-  // Update a profile's name. If it is saved, persist via PUT /profiles/:id;
-  // otherwise patch the in-memory (API) copy only — an unsaved profile has no
-  // backend record to update.
+  // Update a profile's name. If it is saved, the name is patched locally first
+  // (optimistic) so the UI reflects the change immediately, then persisted via
+  // PUT /profiles/:id. On failure the previous name is restored and the error
+  // re-thrown. The in-memory-only (unsaved) branch patches local state without
+  // a network call and is not optimistic because there is no rollback needed.
   async function updateProfileName(
     id: string,
     firstName: string,
     lastName: string,
   ): Promise<Profile | undefined> {
     if (isSaved(id)) {
-      const updated = await profilesService.update(id, { firstName, lastName })
-      patchLocalName(id, updated.firstName, updated.lastName)
-      return updated
+      // Capture the name showing before the optimistic patch so we can restore
+      // it if the API call fails.
+      const existing = savedProfiles.value.find((p) => p.id === id)
+      const previousFirst = existing?.firstName ?? ''
+      const previousLast = existing?.lastName ?? ''
+
+      // Optimistically update both lists so every screen reflects the change
+      // without waiting for the API round-trip.
+      patchLocalName(id, firstName, lastName)
+
+      try {
+        const updated = await profilesService.update(id, { firstName, lastName })
+        // Reconcile with the server response in case it normalised the name.
+        patchLocalName(id, updated.firstName, updated.lastName)
+        return updated
+      } catch (err) {
+        // Rollback: restore the name that was visible before the optimistic patch.
+        patchLocalName(id, previousFirst, previousLast)
+        throw err
+      }
     }
+
     patchLocalName(id, firstName, lastName)
     return getProfile(id, 'api')
   }
 
-  // DELETE /profiles/:id. Removes the profile from the saved list on success.
+  // DELETE /profiles/:id. Removes the profile from savedProfiles immediately
+  // (optimistic) so the UI responds without waiting for the server. On failure
+  // the profile is restored to its original list position and the error
+  // re-thrown so the UI can show a toast.
   async function deleteProfile(id: string): Promise<void> {
-    await profilesService.remove(id)
+    // Record position and value before removal so the rollback is exact.
+    const index = savedProfiles.value.findIndex((p) => p.id === id)
+    const removed = savedProfiles.value[index]
+
+    // Optimistically remove — the UI sees the deletion immediately.
     savedProfiles.value = savedProfiles.value.filter((p) => p.id !== id)
+
+    try {
+      await profilesService.remove(id)
+    } catch (err) {
+      // Rollback: splice the profile back into its original position.
+      if (removed !== undefined) {
+        savedProfiles.value.splice(index, 0, removed)
+      }
+      throw err
+    }
   }
 
   return {

@@ -153,6 +153,51 @@ describe('useProfilesStore', () => {
       await expect(store.saveProfile(makeProfile())).rejects.toThrow('409')
       expect(store.savedProfiles).toEqual([])
     })
+
+    // --- Optimistic save tests ---
+
+    it('adds a provisional entry optimistically before the API responds', async () => {
+      const profile = makeProfile()
+      let resolveCreate!: (p: Profile) => void
+      vi.mocked(profilesService.create).mockReturnValue(
+        new Promise<Profile>((resolve) => {
+          resolveCreate = resolve
+        }),
+      )
+      const store = useProfilesStore()
+
+      const savePromise = store.saveProfile(profile)
+
+      // The provisional entry should be visible before the API responds.
+      expect(store.savedProfiles).toHaveLength(1)
+      expect(store.savedProfiles[0].id).toBe(profile.id)
+
+      resolveCreate(makeProfile({ createdAt: '2026-07-02T00:00:00.000Z' }))
+      await savePromise
+    })
+
+    it('reconciles the provisional entry with the server response on success', async () => {
+      const profile = makeProfile()
+      const created = makeProfile({
+        createdAt: '2026-07-02T00:00:00.000Z',
+        updatedAt: '2026-07-02T00:00:00.000Z',
+      })
+      vi.mocked(profilesService.create).mockResolvedValue(created)
+      const store = useProfilesStore()
+
+      await store.saveProfile(profile)
+
+      expect(store.savedProfiles).toHaveLength(1)
+      expect(store.savedProfiles[0]).toEqual(created)
+    })
+
+    it('removes the provisional entry and re-throws when the API rejects', async () => {
+      vi.mocked(profilesService.create).mockRejectedValue(new Error('network error'))
+      const store = useProfilesStore()
+
+      await expect(store.saveProfile(makeProfile())).rejects.toThrow('network error')
+      expect(store.savedProfiles).toHaveLength(0)
+    })
   })
 
   describe('updateProfileName', () => {
@@ -206,6 +251,46 @@ describe('useProfilesStore', () => {
       expect(store.randomProfiles[0].firstName).toBe('Grace')
       expect(store.savedProfiles[0].firstName).toBe('Grace')
     })
+
+    // --- Optimistic name update tests ---
+
+    it('patches the name optimistically before the API responds', async () => {
+      const saved = makeProfile()
+      vi.mocked(profilesService.getAll).mockResolvedValue([saved])
+      let resolveUpdate!: (p: Profile) => void
+      vi.mocked(profilesService.update).mockReturnValue(
+        new Promise<Profile>((resolve) => {
+          resolveUpdate = resolve
+        }),
+      )
+      const store = useProfilesStore()
+      await store.fetchSavedProfiles()
+
+      const updatePromise = store.updateProfileName(saved.id, 'Grace', 'Hopper')
+
+      // The name should be visible in the list before the API responds.
+      expect(store.savedProfiles[0].firstName).toBe('Grace')
+      expect(store.savedProfiles[0].lastName).toBe('Hopper')
+
+      resolveUpdate(makeProfile({ firstName: 'Grace', lastName: 'Hopper' }))
+      await updatePromise
+    })
+
+    it('rolls back the name to the previous value when the API rejects', async () => {
+      const saved = makeProfile() // firstName: 'Ada', lastName: 'Lovelace'
+      vi.mocked(profilesService.getAll).mockResolvedValue([saved])
+      vi.mocked(profilesService.update).mockRejectedValue(new Error('server error'))
+      const store = useProfilesStore()
+      await store.fetchSavedProfiles()
+
+      await expect(store.updateProfileName(saved.id, 'Grace', 'Hopper')).rejects.toThrow(
+        'server error',
+      )
+
+      const profile = store.savedProfiles.find((p) => p.id === saved.id)
+      expect(profile?.firstName).toBe('Ada')
+      expect(profile?.lastName).toBe('Lovelace')
+    })
   })
 
   describe('deleteProfile', () => {
@@ -232,6 +317,45 @@ describe('useProfilesStore', () => {
 
       await expect(store.deleteProfile('uuid-1')).rejects.toThrow('not found')
       expect(store.savedProfiles).toHaveLength(1)
+    })
+
+    // --- Optimistic delete tests ---
+
+    it('removes the profile optimistically before the API responds', async () => {
+      vi.mocked(profilesService.getAll).mockResolvedValue([makeProfile()])
+      let resolveRemove!: () => void
+      vi.mocked(profilesService.remove).mockReturnValue(
+        new Promise<void>((resolve) => {
+          resolveRemove = resolve
+        }),
+      )
+      const store = useProfilesStore()
+      await store.fetchSavedProfiles()
+
+      const deletePromise = store.deleteProfile('uuid-1')
+
+      // The profile should be gone before the API resolves.
+      expect(store.savedProfiles).toHaveLength(0)
+
+      resolveRemove()
+      await deletePromise
+      expect(store.savedProfiles).toHaveLength(0)
+    })
+
+    it('restores the deleted profile at its original list position on API failure', async () => {
+      vi.mocked(profilesService.getAll).mockResolvedValue([
+        makeProfile({ id: 'uuid-1' }),
+        makeProfile({ id: 'uuid-2' }),
+      ])
+      vi.mocked(profilesService.remove).mockRejectedValue(new Error('server error'))
+      const store = useProfilesStore()
+      await store.fetchSavedProfiles()
+
+      await expect(store.deleteProfile('uuid-1')).rejects.toThrow('server error')
+
+      // uuid-1 must be restored at index 0, preserving the original order.
+      expect(store.savedProfiles[0].id).toBe('uuid-1')
+      expect(store.savedProfiles[1].id).toBe('uuid-2')
     })
   })
 
