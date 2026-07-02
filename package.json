@@ -2,18 +2,22 @@
   "name": "profile-explorer",
   "version": "0.1.0",
   "private": true,
-  "description": "Root orchestration for the self-contained backend and frontend apps. Not an npm workspace — each app owns its own dependencies; these scripts only coordinate running and testing them together.",
+  "description": "Root orchestration for the backend service, shared libs, and frontend app. The backend service and shared libs are npm workspaces; the frontend app owns its own dependencies.",
+  "workspaces": ["backend-services/profiles-service", "backend-services/libs/core/*"],
   "scripts": {
-    "install:all": "npm install --prefix backend-services/profiles-service && npm install --prefix frontend-application/profiles-app",
+    "install:all": "npm install && npm install --prefix frontend-application/profiles-app",
+    "build:libs": "npm run build --workspace @libs/shared",
     "db:up": "npm run db:up --prefix backend-services/profiles-service",
     "dev:backend": "npm run dev --prefix backend-services/profiles-service",
+    "predev:backend": "npm run build:libs",
     "dev:frontend": "npm run dev --prefix frontend-application/profiles-app",
-    "up": "npm run install:all && npm run db:up && concurrently --names backend,frontend --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "up": "npm run install:all && npm run build:libs && npm run db:up && concurrently --names backend,frontend --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:backend\" \"npm:dev:frontend\"",
     "dev": "npm run up",
     "down": "bash scripts/down.sh",
+    "test:libs": "npm test --workspace @libs/shared",
     "test:backend": "npm test --prefix backend-services/profiles-service",
     "test:frontend": "npm test --prefix frontend-application/profiles-app",
-    "test": "npm run test:backend && npm run test:frontend"
+    "test": "npm run test:libs && npm run test:backend && npm run test:frontend"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

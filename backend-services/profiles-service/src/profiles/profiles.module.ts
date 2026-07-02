@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ProfilesController } from './profiles.controller'
 import { ProfilesService } from './profiles.service'
-import { ProfilesRepository } from './profiles.repository'
+import { ProfilesDao } from './dao/profiles.dao'
 import { Profile } from './domain/profile.entity'
 import { RandomProfileProvider } from './providers/random-profile.provider'
 import { RandomUserProvider } from './providers/randomuser.provider'
@@ -12,7 +12,7 @@ import { RandomUserProvider } from './providers/randomuser.provider'
   controllers: [ProfilesController],
   providers: [
     ProfilesService,
-    ProfilesRepository,
+    ProfilesDao,
     // Bind the random-profile abstraction to the randomuser.me implementation.
     // Swap useClass here to change providers — nothing else needs to change.
     { provide: RandomProfileProvider, useClass: RandomUserProvider },

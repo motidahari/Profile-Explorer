@@ -60,9 +60,15 @@ fi
 
 bin_path="node_modules/.bin/$bin"
 if [[ ! -x "$bin_path" ]]; then
-  echo "[$label] found ${#files[@]} test file(s) but \"$bin\" is not installed." >&2
-  echo "        Install the runner in this workspace, e.g.  npm install -D $bin" >&2
-  exit 1
+  # In an npm workspace the runner is hoisted to the root node_modules/.bin, which
+  # npm puts on PATH when running a workspace script. Fall back to that resolution.
+  if command -v "$bin" >/dev/null 2>&1; then
+    bin_path="$(command -v "$bin")"
+  else
+    echo "[$label] found ${#files[@]} test file(s) but \"$bin\" is not installed." >&2
+    echo "        Install the runner in this workspace, e.g.  npm install -D $bin" >&2
+    exit 1
+  fi
 fi
 
 echo "[$label] running $bin on ${#files[@]} file(s)…"

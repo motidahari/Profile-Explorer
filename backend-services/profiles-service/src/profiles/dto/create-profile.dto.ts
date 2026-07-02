@@ -1,5 +1,5 @@
-import { IsIn, IsInt, IsNotEmpty, IsString, Min } from 'class-validator'
-import type { Gender } from '../domain/profile.entity'
+import { IsEnum, IsInt, IsNotEmpty, IsString, Min } from 'class-validator'
+import { Gender } from '../enum/gender.enum'
 
 export class CreateProfileDto {
   @IsString()
@@ -14,7 +14,7 @@ export class CreateProfileDto {
   @IsNotEmpty()
   lastName!: string
 
-  @IsIn(['male', 'female'])
+  @IsEnum(Gender)
   gender!: Gender
 
   @IsInt()

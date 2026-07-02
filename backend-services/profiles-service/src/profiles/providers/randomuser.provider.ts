@@ -1,6 +1,7 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { RandomProfile, RandomProfileProvider } from './random-profile.provider'
+import { Gender } from '../enum/gender.enum'
 
 // Minimal shape of the randomuser.me response — only the fields we map. The
 // upstream payload is much larger; typing just what we consume keeps the
@@ -60,7 +61,7 @@ export class RandomUserProvider extends RandomProfileProvider {
       id: result.login.uuid,
       firstName: result.name.first,
       lastName: result.name.last,
-      gender: result.gender === 'female' ? 'female' : 'male',
+      gender: result.gender === 'female' ? Gender.FEMALE : Gender.MALE,
       age: result.dob.age,
       yearOfBirth: new Date(result.dob.date).getUTCFullYear(),
       email: result.email,
