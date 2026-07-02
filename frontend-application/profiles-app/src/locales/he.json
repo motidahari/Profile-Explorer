@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "fetch": "טען",
+    "history": "היסטוריה",
+    "back": "חזרה"
+  },
+  "profile": {
+    "gender": "מגדר",
+    "name": "שם",
+    "age": "גיל",
+    "address": "כתובת",
+    "contact": "איש קשר",
+    "email": "אימייל",
+    "phone": "טלפון"
+  },
+  "action": {
+    "save": "שמור",
+    "delete": "מחק",
+    "update": "עדכן",
+    "fetch": "טען"
+  },
+  "state": {
+    "loading": "טוען…",
+    "empty": "לא נמצאו פרופילים",
+    "error": "משהו השתבש",
+    "retry": "נסה שוב"
+  },
+  "filter": {
+    "placeholder": "סינון לפי שם או מדינה…"
+  }
+}
