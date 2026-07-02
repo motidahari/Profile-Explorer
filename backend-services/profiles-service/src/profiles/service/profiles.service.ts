@@ -1,10 +1,10 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
-import { ProfilesDao } from './dao/profiles.dao'
-import { ProfileModel } from './domain-model/profile.model'
-import { CreateProfileDto } from './dto/create-profile.dto'
-import { UpdateProfileDto } from './dto/update-profile.dto'
-import { RandomProfile, RandomProfileProvider } from './providers/random-profile.provider'
+import { ProfilesDao } from '../dao/profiles.dao'
+import { ProfileModel } from '../domain-model/profile.model'
+import { CreateProfileDto } from '../dto/create-profile.dto'
+import { UpdateProfileDto } from '../dto/update-profile.dto'
+import { RandomProfile, RandomProfileProvider } from '../providers/random-profile.provider'
 
 @Injectable()
 export class ProfilesService {
