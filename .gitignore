@@ -21,6 +21,8 @@ logs/
 # Source maps
 *.js.map
 *.d.ts
+!env.d.ts
+!vite-env.d.ts
 
 # OS
 .DS_Store

@@ -1,0 +1,4 @@
+# Build artifacts emitted next to source by composite TS build
+vite.config.js
+vite.config.d.ts
+*.tsbuildinfo

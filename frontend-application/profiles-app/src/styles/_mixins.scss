@@ -1,0 +1,34 @@
+$breakpoints: (
+  'sm': 576px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1280px,
+);
+
+@mixin respond-to($bp) {
+  @media (min-width: map-get($breakpoints, $bp)) {
+    @content;
+  }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin space-inline($start, $end: $start) {
+  margin-inline-start: $start;
+  margin-inline-end: $end;
+}
+
+@mixin pad-inline($start, $end: $start) {
+  padding-inline-start: $start;
+  padding-inline-end: $end;
+}

@@ -1,0 +1,21 @@
+{
+  "nav.fetch": "Fetch",
+  "nav.history": "History",
+  "nav.back": "Back",
+  "profile.gender": "Gender",
+  "profile.name": "Name",
+  "profile.age": "Age",
+  "profile.address": "Address",
+  "profile.contact": "Contact",
+  "profile.email": "Email",
+  "profile.phone": "Phone",
+  "action.save": "Save",
+  "action.delete": "Delete",
+  "action.update": "Update",
+  "action.fetch": "Fetch",
+  "state.loading": "Loading…",
+  "state.empty": "No profiles found",
+  "state.error": "Something went wrong",
+  "state.retry": "Retry",
+  "filter.placeholder": "Filter by name or country…"
+}
