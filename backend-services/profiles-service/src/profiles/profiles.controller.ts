@@ -10,7 +10,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common'
-import { ProfilesService } from './profiles.service'
+import { ProfilesService } from './service/profiles.service'
 import { ProfileModel } from './domain-model/profile.model'
 import { CreateProfileDto } from './dto/create-profile.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
