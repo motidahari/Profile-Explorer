@@ -377,10 +377,11 @@ const sourceLabel = computed(() =>
 
   &__back-icon {
     display: inline-block;
+    transform: rotate(180deg);
 
-    // Point the arrow along the reading direction: left in LTR, right in RTL
+    // Mirror the rotated arrow in RTL so both directions stay symmetric
     [dir='rtl'] & {
-      transform: scaleX(-1);
+      transform: rotate(180deg) scaleX(-1);
     }
   }
 
