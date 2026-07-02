@@ -6,6 +6,70 @@ in a PostgreSQL database. The project is a monorepo with two self-contained appl
 **NestJS + TypeORM backend** (`backend-services/profiles-service`, port 3000) and a
 **Vue 3 + Vite + Pinia frontend** (`frontend-application/profiles-app`, port 5173).
 
+- **Backend** — Node + TypeScript + **NestJS**, TypeORM over **PostgreSQL** (run locally via Docker Compose).
+- **Frontend** — **Vue 3** + Vite + TypeScript (Composition API), Pinia, Vue Router, vue-i18n (Hebrew/English + RTL).
+
+---
+
+## Repository Layout
+
+```
+profile-explorer/
+├─ backend-services/
+│  ├─ profiles-service/             # the NestJS API (self-contained, owns its types)
+│  └─ libs/core/                    # shared libs (@libs/shared: BaseDao, validators, exceptions)
+│
+└─ frontend-application/
+   └─ profiles-app/                 # the Vue 3 SPA (self-contained)
+```
+
+---
+
+## Services
+
+### 1. `profiles-service` — Backend API (NestJS)
+`backend-services/profiles-service` · **http://localhost:3000**
+
+The REST API. Fetches random profiles from randomuser.me and persists saved profiles to PostgreSQL
+via TypeORM. Config (port, CORS origin, DB credentials, provider settings) is read from `.env` through
+NestJS `ConfigService`. The service owns its own domain types — there is no shared types library.
+
+Internal structure of the `profiles` domain:
+
+```
+src/profiles/
+├─ profiles.controller.ts    # HTTP endpoints (routing, pipes, status codes)
+├─ profiles.module.ts        # DI wiring (controller, service, DAO, providers)
+├─ service/                  # business logic — ProfilesService (duplicate 409 / missing 404)
+├─ dao/                      # ProfilesDao — wraps the TypeORM repository
+├─ domain/                   # Profile @Entity (DB table shape)
+├─ domain-model/             # ProfileModel (domain object)
+├─ dto/                      # Create/Update DTOs (class-validator)
+├─ enum/                     # Gender enum
+└─ providers/                # random-profile provider abstraction + randomuser.me implementation
+```
+
+> **Note:** `ProfilesService` lives in its own `service/` folder — it is wired into the controller
+> through NestJS dependency injection, not co-located with it.
+
+See [backend-services/profiles-service/README.md](./backend-services/profiles-service/README.md) for backend-only details.
+
+### 2. `profiles-app` — Frontend SPA (Vue 3)
+`frontend-application/profiles-app` · **http://localhost:5173**
+
+The Vue 3 single-page app: Home, Random List, Saved Profiles, and Profile Detail screens. Uses Pinia
+for state, Vue Router for navigation, axios for HTTP, and vue-i18n for runtime Hebrew/English switching
+with RTL support. The API base URL comes from `VITE_API_BASE_URL`. It owns a frontend copy of the
+`Profile` type that mirrors the API.
+
+See [frontend-application/profiles-app/README.md](./frontend-application/profiles-app/README.md) for frontend-only details.
+
+### `postgres` — Database (Docker)
+Postgres 16 (alpine) via `backend-services/profiles-service/docker-compose.yml` · **localhost:5432**
+
+Local PostgreSQL instance started by the backend (`npm run db:up`). With `DB_SYNCHRONIZE=true`, TypeORM
+creates the schema from the entities on boot (dev only — use migrations in production).
+
 ---
 
 ## Prerequisites
@@ -61,6 +125,9 @@ npm run dev                # Vite dev server
 
 ## Environment variables
 
+Both apps read from `.env` files (git-ignored). Each ships a committed `.env.example` with safe defaults —
+copy it to `.env` the first time (shown in the run steps above).
+
 ### Backend — `backend-services/profiles-service/.env`
 
 | Variable | Default | Description |
@@ -81,6 +148,9 @@ npm run dev                # Vite dev server
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `VITE_API_BASE_URL` | `http://localhost:3000` | Base URL of the backend API |
+
+- All frontend env vars must be prefixed `VITE_` and are read via `import.meta.env` — never hardcode URLs.
+- The backend reads config via NestJS `ConfigService` — never `process.env` directly in providers.
 
 ---
 
@@ -105,3 +175,4 @@ All `:id` params are validated with `ParseUUIDPipe`. Request bodies are validate
 - [DECISIONS.md](./DECISIONS.md) — architectural decisions, RTL approach, corners cut, and the optimistic-update extension
 - [AI_USAGE.md](./AI_USAGE.md) — honest disclosure of AI tooling used during development
 - [backend-services/profiles-service/README.md](./backend-services/profiles-service/README.md) — backend prerequisites, scripts, and API detail
+- [frontend-application/profiles-app/README.md](./frontend-application/profiles-app/README.md) — frontend setup and screens
