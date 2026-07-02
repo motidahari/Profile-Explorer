@@ -1,13 +1,13 @@
 # Profile Explorer
 
-A full-stack app that fetches random user profiles from [randomuser.me](https://randomuser.me),
-lets you browse them, and persists the ones you save to a real PostgreSQL database.
+A full-stack application that fetches random user profiles from [randomuser.me](https://randomuser.me),
+displays them in a filterable list, and lets you save, edit, and delete profiles that are persisted
+in a PostgreSQL database. The project is a monorepo with two self-contained applications: a
+**NestJS + TypeORM backend** (`backend-services/profiles-service`, port 3000) and a
+**Vue 3 + Vite + Pinia frontend** (`frontend-application/profiles-app`, port 5173).
 
 - **Backend** — Node + TypeScript + **NestJS**, TypeORM over **PostgreSQL** (run locally via Docker Compose).
 - **Frontend** — **Vue 3** + Vite + TypeScript (Composition API), Pinia, Vue Router, vue-i18n (Hebrew/English + RTL).
-
-Each app is **self-contained** — its own `package.json`, `tsconfig`, ESLint/Prettier. Install and run
-them independently.
 
 ---
 
@@ -16,7 +16,8 @@ them independently.
 ```
 profile-explorer/
 ├─ backend-services/
-│  └─ profiles-service/             # the NestJS API (self-contained, owns its types)
+│  ├─ profiles-service/             # the NestJS API (self-contained, owns its types)
+│  └─ libs/core/                    # shared libs (@libs/shared: BaseDao, validators, exceptions)
 │
 └─ frontend-application/
    └─ profiles-app/                 # the Vue 3 SPA (self-contained)
@@ -51,18 +52,7 @@ src/profiles/
 > **Note:** `ProfilesService` lives in its own `service/` folder — it is wired into the controller
 > through NestJS dependency injection, not co-located with it.
 
-**Endpoints**
-
-| Method | Path | Purpose | Status |
-|--------|------|---------|--------|
-| `GET` | `/health` | Health check | 200 |
-| `GET` | `/profiles` | List saved profiles | 200 |
-| `GET` | `/profiles/random` | Fetch random profiles from randomuser.me | 200 |
-| `POST` | `/profiles` | Save a profile | 201 / 409 if duplicate |
-| `PUT` | `/profiles/:id` | Update a saved profile's name | 200 / 404 |
-| `DELETE` | `/profiles/:id` | Delete a saved profile | 204 / 404 |
-
-See `backend-services/profiles-service/README.md` for backend-only details.
+See [backend-services/profiles-service/README.md](./backend-services/profiles-service/README.md) for backend-only details.
 
 ### 2. `profiles-app` — Frontend SPA (Vue 3)
 `frontend-application/profiles-app` · **http://localhost:5173**
@@ -72,7 +62,7 @@ for state, Vue Router for navigation, axios for HTTP, and vue-i18n for runtime H
 with RTL support. The API base URL comes from `VITE_API_BASE_URL`. It owns a frontend copy of the
 `Profile` type that mirrors the API.
 
-See `frontend-application/profiles-app/README.md` for frontend-only details.
+See [frontend-application/profiles-app/README.md](./frontend-application/profiles-app/README.md) for frontend-only details.
 
 ### `postgres` — Database (Docker)
 Postgres 16 (alpine) via `backend-services/profiles-service/docker-compose.yml` · **localhost:5432**
@@ -84,73 +74,105 @@ creates the schema from the entities on boot (dev only — use migrations in pro
 
 ## Prerequisites
 
-- **Node.js 20+**
-- **Docker** (for the local PostgreSQL instance)
+| Tool | Minimum version | Purpose |
+|------|-----------------|---------|
+| Node.js | 20 | Backend and frontend runtime / toolchain |
+| npm | 10 (bundled with Node 20) | Package management |
+| Docker | any recent version | Runs the local PostgreSQL 16 database |
 
 ---
 
-## Environment Variables
+## Running the project
+
+### Option A — one command from the repo root
+
+```bash
+# Install all dependencies, build shared libs, start Postgres, and run both apps
+npm run dev
+```
+
+Both servers start concurrently. The backend is ready at `http://localhost:3000`; the frontend at
+`http://localhost:5173`.
+
+To stop Postgres when you are done:
+
+```bash
+npm run down
+```
+
+### Option B — run each app independently
+
+**Backend** (port 3000)
+
+```bash
+cd backend-services/profiles-service
+cp .env.example .env       # first time only
+npm install
+npm run db:up              # starts PostgreSQL via Docker Compose
+npm run dev                # NestJS watch mode
+```
+
+**Frontend** (port 5173)
+
+```bash
+cd frontend-application/profiles-app
+cp .env.example .env       # first time only
+npm install
+npm run dev                # Vite dev server
+```
+
+---
+
+## Environment variables
 
 Both apps read from `.env` files (git-ignored). Each ships a committed `.env.example` with safe defaults —
-copy it to `.env` the first time (shown in the run steps below).
+copy it to `.env` the first time (shown in the run steps above).
 
-**Backend** (`backend-services/profiles-service/.env`):
+### Backend — `backend-services/profiles-service/.env`
 
-```
-PORT=3000
-CORS_ORIGIN=http://localhost:5173
-DB_HOST=localhost
-DB_PORT=5432
-DB_USER=profiles
-DB_PASSWORD=profiles
-DB_NAME=profiles
-DB_SYNCHRONIZE=true
-RANDOMUSER_API_URL=https://randomuser.me/api
-RANDOM_PROFILE_COUNT=10
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | Port the NestJS server listens on |
+| `CORS_ORIGIN` | `http://localhost:5173` | Allowed CORS origin (Vite dev server) |
+| `DB_HOST` | `localhost` | Postgres host |
+| `DB_PORT` | `5432` | Postgres port |
+| `DB_USER` | `profiles` | Postgres user |
+| `DB_PASSWORD` | `profiles` | Postgres password |
+| `DB_NAME` | `profiles` | Postgres database name |
+| `DB_SYNCHRONIZE` | `true` | TypeORM schema sync — **disable in production** |
+| `RANDOMUSER_API_URL` | `https://randomuser.me/api` | Upstream random-user provider URL |
+| `RANDOM_PROFILE_COUNT` | `10` | Number of profiles returned by `GET /profiles/random` |
 
-**Frontend** (`frontend-application/profiles-app/.env`):
+### Frontend — `frontend-application/profiles-app/.env`
 
-```
-VITE_API_BASE_URL=http://localhost:3000
-```
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VITE_API_BASE_URL` | `http://localhost:3000` | Base URL of the backend API |
 
 - All frontend env vars must be prefixed `VITE_` and are read via `import.meta.env` — never hardcode URLs.
 - The backend reads config via NestJS `ConfigService` — never `process.env` directly in providers.
 
 ---
 
-## Running the Project
+## API surface
 
-Each app is self-contained — install and run them independently, in two terminals.
+| Method | Path | Success | Error | Description |
+|--------|------|---------|-------|-------------|
+| `GET` | `/health` | 200 | — | Health check |
+| `GET` | `/profiles` | 200 | — | Return all saved profiles, newest first |
+| `GET` | `/profiles/random` | 200 | 503 | Fetch `RANDOM_PROFILE_COUNT` profiles from randomuser.me |
+| `POST` | `/profiles` | 201 | 400 / 409 | Save a new profile; 409 if the id already exists |
+| `PUT` | `/profiles/:id` | 200 | 400 / 404 | Update a saved profile's first/last name |
+| `DELETE` | `/profiles/:id` | 204 | 404 | Delete a saved profile |
 
-```bash
-# --- Backend (port 3000) ---
-cd backend-services/profiles-service
-cp .env.example .env          # first time only
-npm install
-npm run db:up                 # start PostgreSQL (Docker Compose)
-npm run dev                   # watch mode → http://localhost:3000
-
-# --- Frontend (port 5173) ---
-cd frontend-application/profiles-app
-cp .env.example .env          # first time only
-npm install
-npm run dev                   # Vite dev server → http://localhost:5173
-```
-
-Stop the database when you're done:
-
-```bash
-cd backend-services/profiles-service
-npm run db:down
-```
+All `:id` params are validated with `ParseUUIDPipe`. Request bodies are validated with
+`class-validator` via a global `ValidationPipe`.
 
 ---
 
-## Documentation
+## Further reading
 
-- `DECISIONS.md` — key technical decisions and trade-offs.
-- `AI_USAGE.md` — disclosure of AI tooling used.
-- `backend-services/profiles-service/README.md` — backend setup and API reference.
-- `frontend-application/profiles-app/README.md` — frontend setup and screens.
+- [DECISIONS.md](./DECISIONS.md) — architectural decisions, RTL approach, corners cut, and the optimistic-update extension
+- [AI_USAGE.md](./AI_USAGE.md) — honest disclosure of AI tooling used during development
+- [backend-services/profiles-service/README.md](./backend-services/profiles-service/README.md) — backend prerequisites, scripts, and API detail
+- [frontend-application/profiles-app/README.md](./frontend-application/profiles-app/README.md) — frontend setup and screens
