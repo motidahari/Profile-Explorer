@@ -8,9 +8,21 @@
       <div class="app-layout__container app-layout__container--header">
         <div class="app-layout__brand">
           <span class="app-layout__brand-icon" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <circle cx="12" cy="8" r="4" fill="currentColor" opacity="0.9" />
-              <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+              <path
+                d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                opacity="0.7"
+              />
             </svg>
           </span>
           <span class="app-layout__brand-name">Profile Explorer</span>
