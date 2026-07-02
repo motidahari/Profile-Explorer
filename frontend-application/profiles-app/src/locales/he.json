@@ -11,6 +11,8 @@
   "profile": {
     "gender": "מגדר",
     "name": "שם",
+    "firstName": "שם פרטי",
+    "lastName": "שם משפחה",
     "age": "גיל",
     "yearOfBirth": "שנת לידה",
     "address": "כתובת",
@@ -25,6 +27,17 @@
       "male": "זכר",
       "female": "נקבה"
     }
+  },
+  "detail": {
+    "personal": "מידע אישי",
+    "editName": "עריכת שם",
+    "sourceDb": "שמור",
+    "sourceApi": "מ-API",
+    "notFound": "פרופיל לא נמצא",
+    "saved": "הפרופיל נשמר",
+    "updated": "השם עודכן",
+    "deleted": "הפרופיל נמחק",
+    "alreadySaved": "הפרופיל כבר שמור"
   },
   "action": {
     "save": "שמור",

@@ -11,6 +11,8 @@
   "profile": {
     "gender": "Gender",
     "name": "Name",
+    "firstName": "First Name",
+    "lastName": "Last Name",
     "age": "Age",
     "yearOfBirth": "Year of Birth",
     "address": "Address",
@@ -25,6 +27,17 @@
       "male": "Male",
       "female": "Female"
     }
+  },
+  "detail": {
+    "personal": "Personal",
+    "editName": "Edit Name",
+    "sourceDb": "Saved",
+    "sourceApi": "From API",
+    "notFound": "Profile not found",
+    "saved": "Profile saved",
+    "updated": "Name updated",
+    "deleted": "Profile deleted",
+    "alreadySaved": "Profile already saved"
   },
   "action": {
     "save": "Save",
