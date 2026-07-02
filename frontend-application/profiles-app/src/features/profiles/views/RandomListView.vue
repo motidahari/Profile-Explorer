@@ -5,11 +5,9 @@ import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { useProfilesStore } from '../stores/useProfilesStore'
 import { useFilter } from '../composables/useFilter'
-import ProfileRow from '../components/ProfileRow.vue'
+import ProfileTable from '../components/ProfileTable.vue'
 import GiButton from '../../../shared/components/GiButton.vue'
 import GiInput from '../../../shared/components/GiInput.vue'
-import GiList from '../../../shared/components/GiList.vue'
-import GiSkeleton from '../../../shared/components/GiSkeleton.vue'
 import GiEmptyState from '../../../shared/components/GiEmptyState.vue'
 import GiErrorState from '../../../shared/components/GiErrorState.vue'
 import type { Profile } from '../types/profile'
@@ -46,7 +44,10 @@ function goBack(): void {
   <div class="random-list-view">
     <div class="random-list-view__header">
       <div class="random-list-view__nav">
-        <GiButton variant="ghost" size="sm" @click="goBack"> ← {{ t('action.back') }} </GiButton>
+        <GiButton variant="ghost" size="sm" @click="goBack">
+          {{ t('action.back') }}
+          <span class="random-list-view__back-icon" aria-hidden="true">←</span>
+        </GiButton>
       </div>
       <div class="random-list-view__title-row">
         <h1 class="random-list-view__title">{{ t('list.randomTitle') }}</h1>
@@ -75,28 +76,19 @@ function goBack(): void {
         :retry-label="t('state.retry')"
       />
 
-      <GiList v-else :items="filtered" :loading="randomLoading">
-        <template #loading>
-          <div v-for="n in 8" :key="n" class="random-list-view__skeleton-row">
-            <GiSkeleton variant="circle" width="48px" height="48px" />
-            <div class="random-list-view__skeleton-content">
-              <GiSkeleton variant="text" width="55%" height="16px" />
-              <GiSkeleton variant="text" width="75%" height="12px" />
-            </div>
-          </div>
-        </template>
+      <GiEmptyState
+        v-else-if="!randomLoading && filtered.length === 0"
+        :title="t('state.empty')"
+        :description="search ? undefined : t('list.emptyRandomDescription')"
+      />
 
-        <template #empty>
-          <GiEmptyState
-            :title="t('state.empty')"
-            :description="search ? undefined : t('list.emptyRandomDescription')"
-          />
-        </template>
-
-        <template #item="{ item }">
-          <ProfileRow :profile="item as Profile" @select="handleSelect" />
-        </template>
-      </GiList>
+      <ProfileTable
+        v-else
+        :items="filtered"
+        :loading="randomLoading"
+        :skeleton-rows="8"
+        @select="handleSelect"
+      />
     </div>
   </div>
 </template>
@@ -111,7 +103,16 @@ function goBack(): void {
   }
 
   &__nav {
-    @include flx;
+    @include flx($justify: flex-end);
+  }
+
+  &__back-icon {
+    display: inline-block;
+
+    // Point the arrow along the reading direction: left in LTR, right in RTL
+    [dir='rtl'] & {
+      transform: scaleX(-1);
+    }
   }
 
   &__title-row {
@@ -152,28 +153,6 @@ function goBack(): void {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-  }
-
-  &__skeleton-row {
-    @include flx($align: center, $gap: var(--space-4));
-    padding-block: var(--space-4);
-    padding-inline: var(--space-4);
-
-    & + & {
-      border-block-start: 1px solid var(--color-border);
-    }
-  }
-
-  &__skeleton-content {
-    @include flx($direction: column, $gap: var(--space-2));
-    flex: 1;
-  }
-
-  // Stagger the appearance of each profile row for a polished load-in effect
-  @for $i from 1 through 10 {
-    :deep(.gi-list__item:nth-child(#{$i}) .profile-row) {
-      animation-delay: #{($i - 1) * 35}ms;
-    }
   }
 }
 </style>
