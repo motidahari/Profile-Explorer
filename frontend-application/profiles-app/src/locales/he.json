@@ -12,20 +12,37 @@
     "gender": "מגדר",
     "name": "שם",
     "age": "גיל",
+    "yearOfBirth": "שנת לידה",
     "address": "כתובת",
+    "city": "עיר",
+    "state": "מחוז",
+    "street": "רחוב",
+    "country": "ארץ",
     "contact": "איש קשר",
     "email": "אימייל",
-    "phone": "טלפון"
+    "phone": "טלפון",
+    "genders": {
+      "male": "זכר",
+      "female": "נקבה"
+    }
   },
   "action": {
     "save": "שמור",
     "delete": "מחק",
     "update": "עדכן",
-    "fetch": "טען"
+    "fetch": "טען",
+    "back": "חזרה"
+  },
+  "list": {
+    "randomTitle": "פרופילים אקראיים",
+    "savedTitle": "פרופילים שמורים",
+    "emptyRandomDescription": "טען פרופילים אקראיים כדי לראות אותם כאן.",
+    "emptySavedDescription": "שמור פרופילים ממסך הפרופילים האקראיים כדי לראות אותם כאן."
   },
   "state": {
     "loading": "טוען…",
     "empty": "לא נמצאו פרופילים",
+    "emptySaved": "אין פרופילים שמורים עדיין",
     "error": "משהו השתבש",
     "retry": "נסה שוב"
   },

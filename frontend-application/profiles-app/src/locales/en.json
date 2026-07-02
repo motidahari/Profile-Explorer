@@ -12,20 +12,37 @@
     "gender": "Gender",
     "name": "Name",
     "age": "Age",
+    "yearOfBirth": "Year of Birth",
     "address": "Address",
+    "city": "City",
+    "state": "State",
+    "street": "Street",
+    "country": "Country",
     "contact": "Contact",
     "email": "Email",
-    "phone": "Phone"
+    "phone": "Phone",
+    "genders": {
+      "male": "Male",
+      "female": "Female"
+    }
   },
   "action": {
     "save": "Save",
     "delete": "Delete",
     "update": "Update",
-    "fetch": "Fetch"
+    "fetch": "Fetch",
+    "back": "Back"
+  },
+  "list": {
+    "randomTitle": "Random Profiles",
+    "savedTitle": "Saved Profiles",
+    "emptyRandomDescription": "Fetch random profiles to see them here.",
+    "emptySavedDescription": "Save profiles from the Random Profiles screen to see them here."
   },
   "state": {
     "loading": "Loading…",
     "empty": "No profiles found",
+    "emptySaved": "No saved profiles yet",
     "error": "Something went wrong",
     "retry": "Retry"
   },
