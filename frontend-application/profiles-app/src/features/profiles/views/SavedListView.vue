@@ -5,11 +5,9 @@ import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { useProfilesStore } from '../stores/useProfilesStore'
 import { useFilter } from '../composables/useFilter'
-import ProfileRow from '../components/ProfileRow.vue'
+import ProfileTable from '../components/ProfileTable.vue'
 import GiButton from '../../../shared/components/GiButton.vue'
 import GiInput from '../../../shared/components/GiInput.vue'
-import GiList from '../../../shared/components/GiList.vue'
-import GiSkeleton from '../../../shared/components/GiSkeleton.vue'
 import GiEmptyState from '../../../shared/components/GiEmptyState.vue'
 import GiErrorState from '../../../shared/components/GiErrorState.vue'
 import type { Profile } from '../types/profile'
@@ -46,7 +44,10 @@ function goBack(): void {
   <div class="saved-list-view">
     <div class="saved-list-view__header">
       <div class="saved-list-view__nav">
-        <GiButton variant="ghost" size="sm" @click="goBack"> ← {{ t('action.back') }} </GiButton>
+        <GiButton variant="ghost" size="sm" @click="goBack">
+          {{ t('action.back') }}
+          <span class="saved-list-view__back-icon" aria-hidden="true">←</span>
+        </GiButton>
       </div>
       <div class="saved-list-view__title-row">
         <h1 class="saved-list-view__title">{{ t('list.savedTitle') }}</h1>
@@ -76,29 +77,20 @@ function goBack(): void {
         :retry-label="t('state.retry')"
       />
 
-      <GiList v-else :items="filtered" :loading="savedLoading">
-        <template #loading>
-          <div v-for="n in 5" :key="n" class="saved-list-view__skeleton-row">
-            <GiSkeleton variant="circle" width="48px" height="48px" />
-            <div class="saved-list-view__skeleton-content">
-              <GiSkeleton variant="text" width="55%" height="16px" />
-              <GiSkeleton variant="text" width="75%" height="12px" />
-            </div>
-          </div>
-        </template>
+      <GiEmptyState
+        v-else-if="!savedLoading && filtered.length === 0"
+        :title="search ? t('state.empty') : t('state.emptySaved')"
+        :description="search ? undefined : t('list.emptySavedDescription')"
+        icon="🔖"
+      />
 
-        <template #empty>
-          <GiEmptyState
-            :title="search ? t('state.empty') : t('state.emptySaved')"
-            :description="search ? undefined : t('list.emptySavedDescription')"
-            icon="🔖"
-          />
-        </template>
-
-        <template #item="{ item }">
-          <ProfileRow :profile="item as Profile" @select="handleSelect" />
-        </template>
-      </GiList>
+      <ProfileTable
+        v-else
+        :items="filtered"
+        :loading="savedLoading"
+        :skeleton-rows="5"
+        @select="handleSelect"
+      />
     </div>
   </div>
 </template>
@@ -113,7 +105,17 @@ function goBack(): void {
   }
 
   &__nav {
-    @include flx;
+    @include flx($justify: flex-end);
+  }
+
+  &__back-icon {
+    display: inline-block;
+    transform: rotate(180deg);
+
+    // Mirror the rotated arrow in RTL so both directions stay symmetric
+    [dir='rtl'] & {
+      transform: rotate(180deg) scaleX(-1);
+    }
   }
 
   &__title-row {
@@ -154,28 +156,6 @@ function goBack(): void {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-  }
-
-  &__skeleton-row {
-    @include flx($align: center, $gap: var(--space-4));
-    padding-block: var(--space-4);
-    padding-inline: var(--space-4);
-
-    & + & {
-      border-block-start: 1px solid var(--color-border);
-    }
-  }
-
-  &__skeleton-content {
-    @include flx($direction: column, $gap: var(--space-2));
-    flex: 1;
-  }
-
-  // Stagger the appearance of each saved profile row
-  @for $i from 1 through 10 {
-    :deep(.gi-list__item:nth-child(#{$i}) .profile-row) {
-      animation-delay: #{($i - 1) * 35}ms;
-    }
   }
 }
 </style>

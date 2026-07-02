@@ -197,7 +197,8 @@ const sourceLabel = computed(() =>
       <!-- Back navigation -->
       <div class="profile-detail__nav">
         <GiButton variant="ghost" size="sm" @click="handleBack">
-          &#8592; {{ t('action.back') }}
+          {{ t('action.back') }}
+          <span class="profile-detail__back-icon" aria-hidden="true">&#8592;</span>
         </GiButton>
       </div>
 
@@ -371,7 +372,17 @@ const sourceLabel = computed(() =>
 
   // ---- Back navigation ----
   &__nav {
-    @include flx;
+    @include flx($justify: flex-end);
+  }
+
+  &__back-icon {
+    display: inline-block;
+    transform: rotate(180deg);
+
+    // Mirror the rotated arrow in RTL so both directions stay symmetric
+    [dir='rtl'] & {
+      transform: rotate(180deg) scaleX(-1);
+    }
   }
 
   // ---- Hero section ----
