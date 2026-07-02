@@ -3,29 +3,31 @@
 import http from '@/core/config/http'
 import type { Profile, CreateProfilePayload, UpdateProfilePayload } from '../types/profile'
 
-const RESOURCE = '/profiles'
+class ProfilesService {
+  private readonly resource = '/profiles'
 
-export const profilesApi = {
   // GET /profiles — all saved profiles.
   async getAll(): Promise<Profile[]> {
-    const { data } = await http.get<Profile[]>(RESOURCE)
+    const { data } = await http.get<Profile[]>(this.resource)
     return data
-  },
+  }
 
   // POST /profiles — persist a new profile. Backend returns 409 on duplicate id.
   async create(payload: CreateProfilePayload): Promise<Profile> {
-    const { data } = await http.post<Profile>(RESOURCE, payload)
+    const { data } = await http.post<Profile>(this.resource, payload)
     return data
-  },
+  }
 
   // PUT /profiles/:id — update a saved profile's name. Backend returns 404 if missing.
   async update(id: string, payload: UpdateProfilePayload): Promise<Profile> {
-    const { data } = await http.put<Profile>(`${RESOURCE}/${id}`, payload)
+    const { data } = await http.put<Profile>(`${this.resource}/${id}`, payload)
     return data
-  },
+  }
 
   // DELETE /profiles/:id — remove a saved profile (204 No Content).
   async remove(id: string): Promise<void> {
-    await http.delete<void>(`${RESOURCE}/${id}`)
-  },
+    await http.delete<void>(`${this.resource}/${id}`)
+  }
 }
+
+export const profilesService = new ProfilesService()

@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useProfilesStore } from './useProfilesStore'
-import { profilesApi } from '../services/profilesApi'
+import { profilesService } from '../services/profiles.service'
 import { randomUserApi } from '../services/randomUserApi'
 import type { Profile } from '../types/profile'
 
-vi.mock('../services/profilesApi', () => ({
-  profilesApi: {
+vi.mock('../services/profiles.service', () => ({
+  profilesService: {
     getAll: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
@@ -83,19 +83,19 @@ describe('useProfilesStore', () => {
   describe('fetchSavedProfiles', () => {
     it('loads profiles from the backend into savedProfiles', async () => {
       const profiles = [makeProfile()]
-      vi.mocked(profilesApi.getAll).mockResolvedValue(profiles)
+      vi.mocked(profilesService.getAll).mockResolvedValue(profiles)
       const store = useProfilesStore()
 
       await store.fetchSavedProfiles()
 
-      expect(profilesApi.getAll).toHaveBeenCalledOnce()
+      expect(profilesService.getAll).toHaveBeenCalledOnce()
       expect(store.savedProfiles).toEqual(profiles)
       expect(store.savedError).toBeNull()
       expect(store.savedLoading).toBe(false)
     })
 
     it('captures the error message on failure', async () => {
-      vi.mocked(profilesApi.getAll).mockRejectedValue(new Error('server error'))
+      vi.mocked(profilesService.getAll).mockRejectedValue(new Error('server error'))
       const store = useProfilesStore()
 
       await store.fetchSavedProfiles()
@@ -109,24 +109,24 @@ describe('useProfilesStore', () => {
     it('posts the profile and appends the created record to savedProfiles', async () => {
       const profile = makeProfile()
       const created = makeProfile({ createdAt: '2026-07-02T00:00:00.000Z' })
-      vi.mocked(profilesApi.create).mockResolvedValue(created)
+      vi.mocked(profilesService.create).mockResolvedValue(created)
       const store = useProfilesStore()
 
       const result = await store.saveProfile(profile)
 
-      expect(profilesApi.create).toHaveBeenCalledOnce()
+      expect(profilesService.create).toHaveBeenCalledOnce()
       expect(store.savedProfiles).toContainEqual(created)
       expect(result).toEqual(created)
     })
 
     it('strips server timestamps from the create payload', async () => {
       const profile = makeProfile({ createdAt: 'x', updatedAt: 'y' })
-      vi.mocked(profilesApi.create).mockResolvedValue(makeProfile())
+      vi.mocked(profilesService.create).mockResolvedValue(makeProfile())
       const store = useProfilesStore()
 
       await store.saveProfile(profile)
 
-      const payload = vi.mocked(profilesApi.create).mock.calls[0][0]
+      const payload = vi.mocked(profilesService.create).mock.calls[0][0]
       expect(payload).not.toHaveProperty('createdAt')
       expect(payload).not.toHaveProperty('updatedAt')
       expect(payload.id).toBe(profile.id)
@@ -134,8 +134,8 @@ describe('useProfilesStore', () => {
 
     it('does not duplicate an already-saved profile', async () => {
       const saved = makeProfile()
-      vi.mocked(profilesApi.getAll).mockResolvedValue([saved])
-      vi.mocked(profilesApi.create).mockResolvedValue(saved)
+      vi.mocked(profilesService.getAll).mockResolvedValue([saved])
+      vi.mocked(profilesService.create).mockResolvedValue(saved)
       const store = useProfilesStore()
       await store.fetchSavedProfiles()
 
@@ -145,7 +145,7 @@ describe('useProfilesStore', () => {
     })
 
     it('propagates a duplicate (409) error to the caller', async () => {
-      vi.mocked(profilesApi.create).mockRejectedValue(
+      vi.mocked(profilesService.create).mockRejectedValue(
         new Error('Request failed with status code 409'),
       )
       const store = useProfilesStore()
@@ -158,8 +158,8 @@ describe('useProfilesStore', () => {
   describe('updateProfileName', () => {
     it('persists the name via the API when the profile is saved', async () => {
       const saved = makeProfile()
-      vi.mocked(profilesApi.getAll).mockResolvedValue([saved])
-      vi.mocked(profilesApi.update).mockResolvedValue(
+      vi.mocked(profilesService.getAll).mockResolvedValue([saved])
+      vi.mocked(profilesService.update).mockResolvedValue(
         makeProfile({ firstName: 'Grace', lastName: 'Hopper' }),
       )
       const store = useProfilesStore()
@@ -167,7 +167,7 @@ describe('useProfilesStore', () => {
 
       await store.updateProfileName(saved.id, 'Grace', 'Hopper')
 
-      expect(profilesApi.update).toHaveBeenCalledWith(saved.id, {
+      expect(profilesService.update).toHaveBeenCalledWith(saved.id, {
         firstName: 'Grace',
         lastName: 'Hopper',
       })
@@ -184,7 +184,7 @@ describe('useProfilesStore', () => {
 
       await store.updateProfileName(apiProfile.id, 'Grace', 'Hopper')
 
-      expect(profilesApi.update).not.toHaveBeenCalled()
+      expect(profilesService.update).not.toHaveBeenCalled()
       const patched = store.randomProfiles.find((p) => p.id === apiProfile.id)
       expect(patched?.firstName).toBe('Grace')
       expect(patched?.lastName).toBe('Hopper')
@@ -193,8 +193,8 @@ describe('useProfilesStore', () => {
     it('reflects a saved-profile update across the random list too', async () => {
       const profile = makeProfile()
       vi.mocked(randomUserApi.fetchProfiles).mockResolvedValue([makeProfile()])
-      vi.mocked(profilesApi.getAll).mockResolvedValue([makeProfile()])
-      vi.mocked(profilesApi.update).mockResolvedValue(
+      vi.mocked(profilesService.getAll).mockResolvedValue([makeProfile()])
+      vi.mocked(profilesService.update).mockResolvedValue(
         makeProfile({ firstName: 'Grace', lastName: 'Hopper' }),
       )
       const store = useProfilesStore()
@@ -210,23 +210,23 @@ describe('useProfilesStore', () => {
 
   describe('deleteProfile', () => {
     it('removes the profile from savedProfiles on success', async () => {
-      vi.mocked(profilesApi.getAll).mockResolvedValue([
+      vi.mocked(profilesService.getAll).mockResolvedValue([
         makeProfile(),
         makeProfile({ id: 'uuid-2' }),
       ])
-      vi.mocked(profilesApi.remove).mockResolvedValue(undefined)
+      vi.mocked(profilesService.remove).mockResolvedValue(undefined)
       const store = useProfilesStore()
       await store.fetchSavedProfiles()
 
       await store.deleteProfile('uuid-1')
 
-      expect(profilesApi.remove).toHaveBeenCalledWith('uuid-1')
+      expect(profilesService.remove).toHaveBeenCalledWith('uuid-1')
       expect(store.savedProfiles.map((p) => p.id)).toEqual(['uuid-2'])
     })
 
     it('propagates the error and keeps the list intact on failure', async () => {
-      vi.mocked(profilesApi.getAll).mockResolvedValue([makeProfile()])
-      vi.mocked(profilesApi.remove).mockRejectedValue(new Error('not found'))
+      vi.mocked(profilesService.getAll).mockResolvedValue([makeProfile()])
+      vi.mocked(profilesService.remove).mockRejectedValue(new Error('not found'))
       const store = useProfilesStore()
       await store.fetchSavedProfiles()
 
@@ -237,7 +237,7 @@ describe('useProfilesStore', () => {
 
   describe('getters', () => {
     it('isSaved reflects the saved list', async () => {
-      vi.mocked(profilesApi.getAll).mockResolvedValue([makeProfile()])
+      vi.mocked(profilesService.getAll).mockResolvedValue([makeProfile()])
       const store = useProfilesStore()
       await store.fetchSavedProfiles()
 
@@ -249,7 +249,7 @@ describe('useProfilesStore', () => {
       vi.mocked(randomUserApi.fetchProfiles).mockResolvedValue([
         makeProfile({ id: 'api-1', firstName: 'FromApi' }),
       ])
-      vi.mocked(profilesApi.getAll).mockResolvedValue([
+      vi.mocked(profilesService.getAll).mockResolvedValue([
         makeProfile({ id: 'db-1', firstName: 'FromDb' }),
       ])
       const store = useProfilesStore()
@@ -262,7 +262,7 @@ describe('useProfilesStore', () => {
     })
 
     it('getProfile falls back across both lists when no source is given', async () => {
-      vi.mocked(profilesApi.getAll).mockResolvedValue([makeProfile({ id: 'db-1' })])
+      vi.mocked(profilesService.getAll).mockResolvedValue([makeProfile({ id: 'db-1' })])
       const store = useProfilesStore()
       await store.fetchSavedProfiles()
 

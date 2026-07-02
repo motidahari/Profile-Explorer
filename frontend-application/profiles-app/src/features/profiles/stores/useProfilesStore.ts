@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { profilesApi } from '../services/profilesApi'
+import { profilesService } from '../services/profiles.service'
 import { randomUserApi } from '../services/randomUserApi'
 import type { CreateProfilePayload, Profile, ProfileSource } from '../types/profile'
 
@@ -76,7 +76,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     savedLoading.value = true
     savedError.value = null
     try {
-      savedProfiles.value = await profilesApi.getAll()
+      savedProfiles.value = await profilesService.getAll()
     } catch (err) {
       savedError.value = toMessage(err)
     } finally {
@@ -87,7 +87,7 @@ export const useProfilesStore = defineStore('profiles', () => {
   // POST /profiles. Errors (e.g. 409 duplicate) propagate to the caller so the
   // UI can surface them via toast.
   async function saveProfile(profile: Profile): Promise<Profile> {
-    const created = await profilesApi.create(toPayload(profile))
+    const created = await profilesService.create(toPayload(profile))
     if (!isSaved(created.id)) {
       savedProfiles.value.push(created)
     }
@@ -103,7 +103,7 @@ export const useProfilesStore = defineStore('profiles', () => {
     lastName: string,
   ): Promise<Profile | undefined> {
     if (isSaved(id)) {
-      const updated = await profilesApi.update(id, { firstName, lastName })
+      const updated = await profilesService.update(id, { firstName, lastName })
       patchLocalName(id, updated.firstName, updated.lastName)
       return updated
     }
@@ -113,7 +113,7 @@ export const useProfilesStore = defineStore('profiles', () => {
 
   // DELETE /profiles/:id. Removes the profile from the saved list on success.
   async function deleteProfile(id: string): Promise<void> {
-    await profilesApi.remove(id)
+    await profilesService.remove(id)
     savedProfiles.value = savedProfiles.value.filter((p) => p.id !== id)
   }
 

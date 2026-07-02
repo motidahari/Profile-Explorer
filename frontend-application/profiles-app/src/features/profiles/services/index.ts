@@ -1,2 +1,2 @@
-export { profilesApi } from './profilesApi'
+export { profilesService } from './profiles.service'
 export { randomUserApi, mapRandomUserToProfile } from './randomUserApi'
