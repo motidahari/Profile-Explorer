@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import AppButton from '../../../shared/components/AppButton.vue'
+import GiButton from '../../../shared/components/GiButton.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -40,12 +40,12 @@ function goToSavedList(): void {
       </div>
 
       <div class="home-view__actions">
-        <AppButton variant="primary" size="lg" @click="goToRandomList">
+        <GiButton variant="primary" size="lg" @click="goToRandomList">
           {{ t('nav.fetch') }}
-        </AppButton>
-        <AppButton variant="secondary" size="lg" @click="goToSavedList">
+        </GiButton>
+        <GiButton variant="secondary" size="lg" @click="goToSavedList">
           {{ t('nav.history') }}
-        </AppButton>
+        </GiButton>
       </div>
     </div>
   </div>

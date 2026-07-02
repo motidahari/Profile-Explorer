@@ -15,15 +15,15 @@ function handleError(): void {
 </script>
 
 <template>
-  <div class="app-avatar" :class="`app-avatar--${size ?? 'md'}`">
+  <div class="gi-avatar" :class="`gi-avatar--${size ?? 'md'}`">
     <img
       v-if="src && !imageError"
-      class="app-avatar__image"
+      class="gi-avatar__image"
       :src="src"
       :alt="alt ?? ''"
       @error="handleError"
     />
-    <span v-else class="app-avatar__fallback" aria-hidden="true">
+    <span v-else class="gi-avatar__fallback" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="currentColor" width="60%" height="60%">
         <circle cx="12" cy="8" r="4" />
         <path d="M4 20c0-4.418 3.582-8 8-8s8 3.582 8 8" />
@@ -33,7 +33,7 @@ function handleError(): void {
 </template>
 
 <style lang="scss" scoped>
-.app-avatar {
+.gi-avatar {
   @include flex-center;
   border-radius: var(--radius-full);
   overflow: hidden;

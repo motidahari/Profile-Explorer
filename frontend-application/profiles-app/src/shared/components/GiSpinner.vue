@@ -6,17 +6,17 @@ defineProps<{
 
 <template>
   <span
-    class="app-spinner"
-    :class="`app-spinner--${size ?? 'md'}`"
+    class="gi-spinner"
+    :class="`gi-spinner--${size ?? 'md'}`"
     role="status"
     aria-label="Loading"
   >
-    <span class="app-spinner__ring" aria-hidden="true" />
+    <span class="gi-spinner__ring" aria-hidden="true" />
   </span>
 </template>
 
 <style lang="scss" scoped>
-.app-spinner {
+.gi-spinner {
   @include flex-center;
   flex-shrink: 0;
 

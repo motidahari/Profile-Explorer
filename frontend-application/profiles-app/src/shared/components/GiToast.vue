@@ -13,9 +13,9 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="app-toast" :class="`app-toast--${type ?? 'info'}`" role="alert" aria-live="polite">
-    <span class="app-toast__message">{{ message }}</span>
-    <button class="app-toast__close" aria-label="Dismiss" @click="emit('dismiss', id)">
+  <div class="gi-toast" :class="`gi-toast--${type ?? 'info'}`" role="alert" aria-live="polite">
+    <span class="gi-toast__message">{{ message }}</span>
+    <button class="gi-toast__close" aria-label="Dismiss" @click="emit('dismiss', id)">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
         <path
           d="M1 1l12 12M13 1L1 13"
@@ -29,7 +29,7 @@ const emit = defineEmits<{
 </template>
 
 <style lang="scss" scoped>
-.app-toast {
+.gi-toast {
   @include flx($justify: space-between, $align: center, $gap: var(--space-3));
   padding-block: var(--space-3);
   padding-inline: var(--space-4);

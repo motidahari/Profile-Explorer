@@ -74,14 +74,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="rootRef" class="app-dropdown" :class="{ 'app-dropdown--open': isOpen }">
-    <label v-if="label" class="app-dropdown__label">{{ label }}</label>
-    <button type="button" class="app-dropdown__trigger" @click="toggle">
-      <span class="app-dropdown__value">
+  <div ref="rootRef" class="gi-dropdown" :class="{ 'gi-dropdown--open': isOpen }">
+    <label v-if="label" class="gi-dropdown__label">{{ label }}</label>
+    <button type="button" class="gi-dropdown__trigger" @click="toggle">
+      <span class="gi-dropdown__value">
         {{ selectedLabel ?? placeholder ?? '' }}
       </span>
       <svg
-        class="app-dropdown__chevron"
+        class="gi-dropdown__chevron"
         width="16"
         height="16"
         viewBox="0 0 16 16"
@@ -97,16 +97,16 @@ onBeforeUnmount(() => {
         />
       </svg>
     </button>
-    <div v-if="isOpen" class="app-dropdown__panel">
-      <div v-if="searchable !== false" class="app-dropdown__search-wrap">
-        <input v-model="searchQuery" class="app-dropdown__search" type="text" autocomplete="off" />
+    <div v-if="isOpen" class="gi-dropdown__panel">
+      <div v-if="searchable !== false" class="gi-dropdown__search-wrap">
+        <input v-model="searchQuery" class="gi-dropdown__search" type="text" autocomplete="off" />
       </div>
-      <ul class="app-dropdown__list" role="listbox">
+      <ul class="gi-dropdown__list" role="listbox">
         <li
           v-for="option in filteredOptions"
           :key="option.value"
-          class="app-dropdown__option"
-          :class="{ 'app-dropdown__option--selected': option.value === modelValue }"
+          class="gi-dropdown__option"
+          :class="{ 'gi-dropdown__option--selected': option.value === modelValue }"
           role="option"
           :aria-selected="option.value === modelValue"
           @click="select(option.value)"
@@ -115,7 +115,7 @@ onBeforeUnmount(() => {
         </li>
         <li
           v-if="filteredOptions.length === 0"
-          class="app-dropdown__option app-dropdown__option--empty"
+          class="gi-dropdown__option gi-dropdown__option--empty"
         >
           —
         </li>
@@ -125,7 +125,7 @@ onBeforeUnmount(() => {
 </template>
 
 <style lang="scss" scoped>
-.app-dropdown {
+.gi-dropdown {
   position: relative;
   width: 100%;
 
