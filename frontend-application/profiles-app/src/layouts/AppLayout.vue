@@ -1,5 +1,6 @@
 <script setup lang="ts">
-// Language switcher will be added here when AppLanguageSwitcher shared component is built
+import AppLanguageSwitcher from '../shared/components/AppLanguageSwitcher.vue'
+import AppToastContainer from '../shared/components/AppToastContainer.vue'
 </script>
 
 <template>
@@ -28,7 +29,7 @@
           <span class="app-layout__brand-name">Profile Explorer</span>
         </div>
         <div class="app-layout__header-actions">
-          <!-- AppLanguageSwitcher will be placed here -->
+          <AppLanguageSwitcher />
         </div>
       </div>
     </header>
@@ -37,6 +38,7 @@
         <slot />
       </div>
     </main>
+    <AppToastContainer />
   </div>
 </template>
 

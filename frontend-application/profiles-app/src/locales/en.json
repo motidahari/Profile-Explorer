@@ -4,6 +4,10 @@
     "history": "History",
     "back": "Back"
   },
+  "home": {
+    "title": "Profile Explorer",
+    "subtitle": "Browse random user profiles, save the ones that matter."
+  },
   "profile": {
     "gender": "Gender",
     "name": "Name",
