@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { ProfilesController } from './profiles.controller'
-import { ProfilesService } from './profiles.service'
+import { ProfilesService } from './service/profiles.service'
 import { ProfilesDao } from './dao/profiles.dao'
 import { Profile } from './domain/profile.entity'
 import { RandomProfileProvider } from './providers/random-profile.provider'
