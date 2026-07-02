@@ -8,7 +8,7 @@
     "db:up": "npm run db:up --prefix backend-services/profiles-service",
     "dev:backend": "npm run dev --prefix backend-services/profiles-service",
     "dev:frontend": "npm run dev --prefix frontend-application/profiles-app",
-    "up": "npm run db:up && concurrently --names backend,frontend --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "up": "npm run install:all && npm run db:up && concurrently --names backend,frontend --prefix-colors blue,magenta --kill-others-on-fail \"npm:dev:backend\" \"npm:dev:frontend\"",
     "dev": "npm run up",
     "down": "bash scripts/down.sh",
     "test:backend": "npm test --prefix backend-services/profiles-service",
