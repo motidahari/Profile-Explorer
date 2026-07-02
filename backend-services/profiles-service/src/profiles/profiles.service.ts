@@ -1,25 +1,29 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { ProfilesRepository } from './profiles.repository'
 import { Profile } from './domain/profile.entity'
 import { CreateProfileDto } from './dto/create-profile.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
 import { RandomProfile, RandomProfileProvider } from './providers/random-profile.provider'
 
-const RANDOM_PROFILE_COUNT = 10
-
 @Injectable()
 export class ProfilesService {
+  private readonly randomProfileCount: number
+
   constructor(
     private readonly repository: ProfilesRepository,
     private readonly randomProfileProvider: RandomProfileProvider,
-  ) {}
+    config: ConfigService,
+  ) {
+    this.randomProfileCount = Number(config.get<string>('RANDOM_PROFILE_COUNT') ?? 10)
+  }
 
   findAll(): Promise<Profile[]> {
     return this.repository.findAll()
   }
 
   fetchRandom(): Promise<RandomProfile[]> {
-    return this.randomProfileProvider.fetchRandom(RANDOM_PROFILE_COUNT)
+    return this.randomProfileProvider.fetchRandom(this.randomProfileCount)
   }
 
   async create(dto: CreateProfileDto): Promise<Profile> {

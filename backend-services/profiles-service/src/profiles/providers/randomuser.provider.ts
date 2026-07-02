@@ -25,8 +25,6 @@ interface RandomUserResponse {
   results: RandomUserResult[]
 }
 
-const DEFAULT_API_URL = 'https://randomuser.me/api'
-
 @Injectable()
 export class RandomUserProvider extends RandomProfileProvider {
   private readonly logger = new Logger(RandomUserProvider.name)
@@ -34,7 +32,7 @@ export class RandomUserProvider extends RandomProfileProvider {
 
   constructor(config: ConfigService) {
     super()
-    this.apiUrl = config.get<string>('RANDOMUSER_API_URL') ?? DEFAULT_API_URL
+    this.apiUrl = config.get<string>('RANDOMUSER_API_URL') ?? 'https://randomuser.me/api'
   }
 
   async fetchRandom(count: number): Promise<RandomProfile[]> {
