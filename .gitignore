@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables (allow .env.example)
+.env
+.env.*
+!.env.example
+*.env.*
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# Source maps
+*.js.map
+*.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+.claude/
+
+# Test coverage
+coverage/
+
+# Vite
+.vite/
+
+# Docker overrides
+docker-compose.override.yml
