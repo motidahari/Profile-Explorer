@@ -82,7 +82,9 @@ function handleSelect(profile: Profile): void {
           </td>
           <td class="profile-table__td">{{ profile.country }}</td>
           <td class="profile-table__td profile-table__td--ltr" dir="ltr">{{ profile.phone }}</td>
-          <td class="profile-table__td profile-table__td--ltr" dir="ltr">{{ profile.email }}</td>
+          <td class="profile-table__td profile-table__td--ltr profile-table__td--email" dir="ltr">
+            {{ profile.email }}
+          </td>
         </tr>
       </tbody>
     </table>
@@ -96,7 +98,7 @@ function handleSelect(profile: Profile): void {
 
   &__table {
     width: 100%;
-    min-width: 720px;
+    min-width: 600px;
     border-collapse: collapse;
     text-align: start;
   }
@@ -162,6 +164,12 @@ function handleSelect(profile: Profile): void {
       direction: ltr;
       unicode-bidi: isolate;
       text-align: start;
+    }
+
+    // Let long emails wrap instead of forcing the table to overflow its column
+    &--email {
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
   }
 
